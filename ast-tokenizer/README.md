@@ -73,8 +73,12 @@ The current implementation mainly picks up top level classes and functions in ea
 
 ### Language Parsers
 [Tree Sitter Python](https://github.com/tree-sitter/tree-sitter-python) for Python 2/3 parsing
+
 [Tree Sitter Javascript](https://github.com/tree-sitter/tree-sitter-javascript) for Javascript/ECMAscript parsing
+
 [Tree Sitter Typescript](https://github.com/tree-sitter/tree-sitter-typescript/blob/master/common/define-grammar.js) for Typescript parsing
 
 [Tree Sitter Go](https://github.com/tree-sitter/tree-sitter-go) for Golang parsing
+
+
 [Tree Sitter Java](https://github.com/tree-sitter/tree-sitter-java) for Java parsing
