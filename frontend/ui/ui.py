@@ -1,6 +1,7 @@
 import streamlit as st
 from utils import conversations
 from functools import partial
+from ui import prints
 
 def render_sidebar():
     """
@@ -21,13 +22,13 @@ def render_sidebar():
                     if repo_url is not None:
                         repo_display_name = convos.get("repo_display_name")
                         if repo_display_name == repo_url:  # If user chose not to set a repo display name
-                            st.button(f"{idx+1}. {repo_url} 📚 ", on_click=update_callback, use_container_width=True)
+                            st.button(f"{idx+1}. {repo_url} 📚 ", on_click=update_callback, use_container_width=True, key=f"convo_{idx}")
                         else:
-                            st.button(f"{idx+1}. {repo_display_name} 📖", on_click=update_callback, use_container_width=True)
+                            st.button(f"{idx+1}. {repo_display_name} 📖", on_click=update_callback, use_container_width=True, key=f"convo_{idx}")
                 
                 with delete_col:
                     delete_convo_callback = partial(conversations.delete_convo, idx)
-                    st.button(f"🗑️", on_click=delete_convo_callback, key=idx)
+                    st.button(f"🗑️", on_click=delete_convo_callback, key=f"delete_{idx}")
 
 
 def render_conversations():
@@ -46,11 +47,15 @@ def get_user_chat_input():
     Pretty prints their inputs via streaming to the chatbox for the first event loop.
     Returns user inputs as a dictionary of user role and the message content 
     """
-    if prompt := st.chat_input("Type your message"):
+    if prompt := st.chat_input("Type your message", key=f"input_{st.session_state.chat_counter}"):
         # Save user input
         prompt_msg = {"role": "user", "content": prompt}
         st.chat_message("user").write_stream(prints.fake_print_stream(prompt))
+
+        # Increment input counter to keep things unique
+        st.session_state.chat_counter += 1
         return prompt_msg
+    return {}
 
 
 class DownloadButton():
