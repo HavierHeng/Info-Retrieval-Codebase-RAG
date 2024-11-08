@@ -29,13 +29,20 @@ The Python bindings for tree-sitter is used in this tokenizer. While there are s
 ## Reasoning behind design 
 
 ### Why use an AST?
-The key idea of using an AST for preprocessing
-The goal of using a smarter processing system that is code aware and able to pick out different blocks of code, maintaing the overall structure of the code.
+The hypothesis was to tokenize the input source code into metadata that sufficiently represents the codebase, by picking key class, function, argument, return values and docstrings that explain what the code is doing. This reduces the token cost when sending to an LLM, but also makes the retrieval process aware of the syntax of the code - since code is organized by blocks rather than nearby lines.
 
-AST provides several benefits
-1) Mostly language agnostic 
+The is makes for a smarter processing system that is code-aware and able to pick out different blocks of code, maintaing the overall structure and relation of the code.
+
+AST provides several benefits:
+1) Mostly language agnostic representation - making it easy to turn into a document to be indexed
 2) Removes unnecessary tokens like braces, semicolons and parenthesis
+3) Syntatic knowledge - Code cannot be tokenized like a normal text document in that relations are encapsulated by code blocks (e.g think of a class or function block), rather than only considering nearby lines
+4) Information on where the original code is located - allowing for references to be made for a RAG system
 
+
+The output of the AST should aim to create individual source code blocks which represent a document to be indexed into the RAG pipeline.
+- e.g: a class named `Foo` is a document
+- e.g 2: a function named `Bar` is a document 
 
 ## Setup
 

@@ -1,1 +1,39 @@
-ast-tokenizer/ast-tokenizer/
+# Ignore the venv file for tokenizer
+/ast-tokenizer/ast-tokenizer/
+/frontend/frontend/
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.so
+
+# Conda environments
+.conda/
+envs/
+*.conda
+
+# Python package manager files
+pip-wheel-metadata/
+*.egg-info/
+dist/
+build/
+
+# Jupyter notebook checkpoints (any .ipynb_checkpoints folder at any level)
+.ipynb_checkpoints/
+
+# IDE configuration files
+.idea/
+
+# VSCode workspace and configuration files
+.vscode/
+
+# System-specific files
+.DS_Store
+Thumbs.db
+
+# Environment-specific files
+*.env
+.env/
+
+
+
