@@ -56,12 +56,11 @@ def main():
     active_messages = st.session_state.global_messages[active_convo]["active_messages"]
 
     # Conversation 1: Setting up codebase by pulling repo and indexing source code
-    if st.session_state.global_messages[active_convo]["repo"] is None:
-        conversations.setup_repo_convo()
-        st.rerun()  # Force reload to Conversation 2 without user intervention. Forces rerendering of button 
+    #    conversations.setup_repo_convo()
+        # st.rerun()  # Force reload to Conversation 2 without user intervention. Forces rerendering of button 
 
     # Conversation 2: Querying codebase using the given information 
-    else:  
+    if st.session_state.global_messages[active_convo]["repo"] is not None:
         # Chat transition only on first proper query
         if len(active_messages) == 0:
             conversations.start_code_convo()  # Regenerate messages

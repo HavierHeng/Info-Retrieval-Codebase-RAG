@@ -4,6 +4,7 @@ from utils import rag
 from utils.llm import (
     DEFAULT_N_PAST_MESSAGES
 )
+from utils import github
 
 
 blank_convo = {"repo": None,
@@ -45,6 +46,7 @@ def add_msgs_to_convo(msgs: list[dict]):
     st.session_state.global_messages[curr_convo]["messages"].extend(msgs)
     st.session_state.global_messages[curr_convo]["active_messages"].extend(msgs)
 
+
 def setup_repo_convo():
     """
     Conversation to set up repository and repository display name.
@@ -53,7 +55,7 @@ def setup_repo_convo():
     curr_convo = get_active_convo()
     with st.container():  # Use a container to group both inputs
         # Request for both repository URL and display name in the same container
-        repo_url, repo_name = ask_for_repo_details()
+        repo_url, repo_name = ui.ask_for_repo_details()
 
         if repo_url and repo_name:
             # Store the information in session state
@@ -63,30 +65,6 @@ def setup_repo_convo():
             # Process the repository (e.g., pulling and indexing)
             process_repository()
 
-def ask_for_repo_details():
-    """
-    Ask for both the repository URL and display name in a single container.
-    The display name is optional and will default to the URL if not provided.
-    """
-    # Create two input fields side by side
-    col1, col2 = st.columns([2, 3])  # Adjust column ratios for layout
-
-    with col1:
-        # Repo URL input
-        repo_url = st.text_input("Enter Repository URL", "")
-    
-    with col2:
-        # Repo display name input (with default as empty)
-        repo_name = st.text_input("Enter Repository Display Name", "")
-
-    if repo_url:
-        # Default repo name to repo URL if not provided
-        if not repo_name.strip():
-            repo_name = repo_url
-        return repo_url, repo_name
-    else:
-        # Return None if no repo URL is provided
-        return None, None
 
 def process_repository():
     """
@@ -95,15 +73,11 @@ def process_repository():
     with st.chat_message("assistant"):
         with st.spinner(text="Pulling Repository..."):
             # TODO: Pull repository with gitpython. If fail - break
-            print("Imagine pulling a repo here")
+            rag.pull_repo()
 
         with st.spinner(text="Indexing repository..."):
             # TODO: RAG Preprocessing
             rag.index_repo()
-            add_msgs_to_display([{
-                "role": "assistant",
-                "content": "Finished indexing repository!"
-            }])
 
 def start_code_convo():
     """
@@ -150,6 +124,7 @@ def start_new_convo():
     """
     st.session_state.global_messages.append(blank_convo)
     st.session_state.update(active_convo_idx=-1)  # Set to latest conversation
+    setup_repo_convo()
 
 
 def delete_convo(idx):

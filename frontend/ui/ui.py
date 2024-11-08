@@ -2,6 +2,7 @@ import streamlit as st
 from utils import conversations
 from functools import partial
 from ui import prints
+from utils import github
 
 def render_sidebar():
     """
@@ -26,9 +27,9 @@ def render_sidebar():
                         else:
                             st.button(f"{idx+1}. {repo_display_name} 📖", on_click=update_callback, use_container_width=True, key=f"convo_{idx}")
                 
-                with delete_col:
-                    delete_convo_callback = partial(conversations.delete_convo, idx)
-                    st.button(f"🗑️", on_click=delete_convo_callback, key=f"delete_{idx}")
+                        with delete_col:
+                            delete_convo_callback = partial(conversations.delete_convo, idx)
+                            st.button(f"🗑️", on_click=delete_convo_callback, key=f"delete_{idx}")
 
 
 def render_conversations():
@@ -56,6 +57,63 @@ def get_user_chat_input():
         st.session_state.chat_counter += 1
         return prompt_msg
     return {}
+
+
+def ask_for_repo_details():
+    """
+    Ask for both the repository URL and display name in a single container.
+    The display name is optional and will default to the URL if not provided.
+    """
+    st.markdown("""
+    ## Setup Your Repository Information
+
+    To proceed, please provide the **Repository URL** and an optional **Display Name** for the repository. 
+    The **Display Name** will be used when referencing the repository in the interface. If you don't provide a display name, 
+    it will default to the repository URL.
+
+    Make sure the URL points to a valid GitHub repository, and feel free to rename it as needed for easier reference.
+    """)
+
+    # Create two input fields side by side
+    col1, col2 = st.columns([2, 3])  # Adjust column ratios for layout
+
+    with col1:
+        # Repo display name input (with default as empty)
+        repo_name = st.text_input("Enter Repository Display Name", "", key=f"repo_name_{st.session_state.chat_counter}")
+        st.session_state.chat_counter += 1
+
+    with col2:
+        # Repo URL input
+        repo_url = st.text_input("Enter Repository URL", "", key=f"repo_url_{st.session_state.chat_counter}")
+        st.session_state.chat_counter += 1
+
+        # Initialize is_valid to False
+        is_valid = False
+        if repo_url:
+            # Validate the repo URL
+            if repo_url.strip():
+                is_valid = github.is_valid_github_repo(repo_url)
+
+                # Show a tick or cross based on the validity of the URL
+                if is_valid:
+                    st.markdown("✅ Valid Github Repo URL")
+                else:
+                    st.markdown("❌ Invalid GitHub Repo URL")
+            else:
+                st.markdown("❌ The GitHub repository URL cannot be empty.")
+
+    if repo_url.strip() and is_valid:  # Only proceed if the URL is valid
+        # Default repo name to repo URL if not provided
+        if not repo_name.strip():
+            repo_name = repo_url
+        return repo_url, repo_name
+    else:
+        # Provide a clear message to the user if repo_url is empty or invalid
+        if not repo_url:
+            st.error("Please enter a valid GitHub repository URL.")
+        elif not is_valid:
+            st.error("The provided GitHub repository URL is invalid. Please correct it.")
+        return "", ""  # Return empty strings if no valid input is provided
 
 
 class DownloadButton():
