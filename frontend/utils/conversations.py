@@ -4,11 +4,12 @@ from utils import rag
 from utils.llm import (
     DEFAULT_N_PAST_MESSAGES
 )
-from utils import github
-
+from ui import prints
 
 blank_convo = {"repo": None,
                "repo_display_name": "",
+               "repo_commit_sha": "",
+               "pull_date": None,  # Datetime for pulling repo
                "messages": [],  # Messages are for display
                "active_messages": []  # Active Messages is passed as context to LLM 
                }
@@ -25,7 +26,6 @@ def update_active_convo(idx: int):
     Updates current index of conversation stored in global state
     """
     st.session_state.update(active_convo_idx=idx)
-
 
 
 def add_msgs_to_display(msgs: list[dict]):
@@ -108,8 +108,11 @@ def continue_code_convo():
 
     if repo_convo.get("content") is not None:
         add_msgs_to_convo([repo_convo])
-        query_result = rag.query_rag(repo_convo["content"])
-        # TODO: This is by right the whole conversation + context from RAG
+        st.chat_message("user").write_stream(prints.fake_print_stream(repo_convo["content"]))
+        with st.spinner("Thinking..."):
+            # TODO: This is by right the whole conversation + context from RAG - there is more processing than retrieval alone
+            query_result = rag.query_rag(repo_convo["content"])
+            st.chat_message("assistant").write_stream(prints.fake_print_stream(query_result))  # Fix the rendering bug since it doesn't refresh right away
         add_msgs_to_convo([{"role": "assistant",
                            "content": f"{query_result}"}]
                           )
@@ -124,7 +127,7 @@ def start_new_convo():
     """
     st.session_state.global_messages.append(blank_convo)
     st.session_state.update(active_convo_idx=-1)  # Set to latest conversation
-    setup_repo_convo()
+    st.session_state.animation["new_convo"] = True
 
 
 def delete_convo(idx):

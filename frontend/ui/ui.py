@@ -42,18 +42,24 @@ def render_conversations():
                 st.write(message["content"])
 
 
+def render_new_conversation():
+    """
+    Handles if there is a request to start a new conversation and reanimates the page accordingly
+    """
+    if st.session_state.animation.get("new_convo"):
+        conversations.setup_repo_convo()
+        st.session_state.animation["new_convo"] = False
+
+
 def get_user_chat_input():
     """
     Gets user's chat inputs.
-    Pretty prints their inputs via streaming to the chatbox for the first event loop.
     Returns user inputs as a dictionary of user role and the message content 
     """
     if prompt := st.chat_input("Type your message", key=f"input_{st.session_state.chat_counter}"):
         # Save user input
         prompt_msg = {"role": "user", "content": prompt}
-        st.chat_message("user").write_stream(prints.fake_print_stream(prompt))
-
-        # Increment input counter to keep things unique
+        # Increment input counter to keep buttons unique
         st.session_state.chat_counter += 1
         return prompt_msg
     return {}
@@ -74,38 +80,51 @@ def ask_for_repo_details():
     Make sure the URL points to a valid GitHub repository, and feel free to rename it as needed for easier reference.
     """)
 
+    if 'repo_url' not in st.session_state:
+        st.session_state.repo_url = ""  # Initialize if not present
+    if 'repo_name' not in st.session_state:
+        st.session_state.repo_name = ""  # Initialize if not present
+
     # Create two input fields side by side
     col1, col2 = st.columns([2, 3])  # Adjust column ratios for layout
 
     with col1:
         # Repo display name input (with default as empty)
-        repo_name = st.text_input("Enter Repository Display Name", "", key=f"repo_name_{st.session_state.chat_counter}")
+        repo_name = st.text_input("Enter Repository Display Name",
+                                  value=st.session_state.repo_name,
+                                  key="repo_name_input")
         st.session_state.chat_counter += 1
+        st.session_state.repo_name = repo_name  # Persist name - since <enter>ing value reload page
 
     with col2:
         # Repo URL input
-        repo_url = st.text_input("Enter Repository URL", "", key=f"repo_url_{st.session_state.chat_counter}")
+        repo_url = st.text_input("Enter Repository URL", 
+                                 value=st.session_state.repo_url,
+                                 key="repo_url_input")
         st.session_state.chat_counter += 1
+        st.session_state.repo_url = repo_url   # Persist URL - since <enter>ing value reloads the page
 
         # Initialize is_valid to False
         is_valid = False
-        if repo_url:
+        if repo_url.strip():
             # Validate the repo URL
-            if repo_url.strip():
-                is_valid = github.is_valid_github_repo(repo_url)
-
-                # Show a tick or cross based on the validity of the URL
-                if is_valid:
-                    st.markdown("✅ Valid Github Repo URL")
-                else:
-                    st.markdown("❌ Invalid GitHub Repo URL")
+            is_valid = github.is_valid_github_repo(repo_url)
+            # Show a tick or cross based on the validity of the URL
+            if is_valid:
+                st.markdown("✅ Valid Github Repo URL")
             else:
-                st.markdown("❌ The GitHub repository URL cannot be empty.")
+                st.markdown("❌ Invalid GitHub Repo URL")
+        else:
+            st.markdown("❌ The GitHub repository URL cannot be empty.")
 
     if repo_url.strip() and is_valid:  # Only proceed if the URL is valid
         # Default repo name to repo URL if not provided
         if not repo_name.strip():
             repo_name = repo_url
+
+        # Reset on success
+        st.session_state.repo_name = ""
+        st.session_state.repo_url = ""
         return repo_url, repo_name
     else:
         # Provide a clear message to the user if repo_url is empty or invalid
