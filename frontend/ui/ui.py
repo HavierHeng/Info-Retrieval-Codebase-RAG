@@ -192,13 +192,15 @@ def get_user_chat_input():
     Gets user's chat inputs.
     Returns user inputs as a dictionary of user role and the message content 
     """
-    if prompt := st.chat_input("Type your message", key=f"input_{st.session_state.chat_counter}"):
+
+    # Input Box key has to be shared across states - else values will be lost between transitions
+    if prompt := st.chat_input("Type your message", key=f"input_box"):
         # Save user input
         prompt_msg = {"role": "user", "content": prompt}
         # Increment input counter to keep buttons unique
-        st.session_state.chat_counter += 1
+        st.toast(f"BINGUS: {prompt}")
         return prompt_msg
-    return {}
+    return None 
 
 
 

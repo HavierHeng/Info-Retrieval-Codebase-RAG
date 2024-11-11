@@ -134,19 +134,19 @@ def continue_code_convo():
 
     repo_convo = ui.get_user_chat_input()
 
-    if repo_convo.get("content") is not None:
+    if repo_convo is not None:
         add_msgs_to_convo(curr_convo, [repo_convo])
         st.chat_message("user").write_stream(prints.fake_print_stream(repo_convo["content"]))
         with st.spinner("Thinking..."):
             # TODO: This is by right the whole conversation + context from RAG - there is more processing than retrieval alone
             query_result = rag.query_rag(repo_convo["content"])
             st.chat_message("assistant").write_stream(prints.fake_print_stream(query_result))  # Fix the rendering bug since it doesn't refresh right away
-        add_msgs_to_convo(curr_convo, [{"role": "assistant",
-                           "content": f"{query_result}"}]
-                          )
+            add_msgs_to_convo(curr_convo, [{"role": "assistant", 
+                                            "content": f"{query_result}"}])
 
     while len(active_messages) > DEFAULT_N_PAST_MESSAGES + 1:  # limit context window
         active_messages.pop(1)  # preserve system message at index 0
+
 
 def delete_convo(idx):
     """
