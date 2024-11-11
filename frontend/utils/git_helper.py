@@ -5,6 +5,8 @@ import streamlit as st
 from pathlib import Path
 import shutil
 import os
+import platform
+import tempfile
 
 class STGitCloneProgress(git.RemoteProgress):
     """
@@ -108,7 +110,10 @@ def clone_repo(repo_url: str, clone_dir = "") -> Optional[os.PathLike]:
 
     if len(clone_dir.strip()) == 0:
         owner, repo_name = get_repo_owner_name_from_url(repo_url)
-        clone_path = Path(f"/tmp/{owner}/{repo_name}")  # TODO: This will break on Windows, *nix assumption
+
+        temp_path = Path("/tmp" if platform.system() == "Darwin" else tempfile.gettempdir())
+
+        clone_path = temp_path / Path(owner) / Path(repo_name)  # TODO: This will break on Windows, *nix assumption
         clone_path.mkdir(parents=True, exist_ok=True)
 
     if clone_path.exists:
