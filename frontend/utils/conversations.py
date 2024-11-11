@@ -13,6 +13,7 @@ blank_convo = {"repo": None,
                "repo_display_name": "",
                "repo_owner": "",
                "repo_commit_sha": "", 
+               "repo_branch": "",  # Which branch is indexed in the RAG system
                "repo_path": None, # Where is repo stored - as an OS.PathLike object
                "pull_date": None,  # Datetime for pulling repo
                "processed": False,  # Has repo been cloned and indexed?
@@ -104,9 +105,10 @@ def process_repository():
 
         if cloned and indexed: 
             st.write("Repository has been processed!")
-            sha_commit = git_helper.get_latest_commit_sha(repo_url)
+            sha_commit, repo_branch = git_helper.get_latest_commit_sha(repo_url)
             st.session_state.global_messages[get_active_convo()]["repo_owner"] = git_helper.get_repo_owner_name_from_url(repo_url)[0]
             st.session_state.global_messages[get_active_convo()]["repo_commit_sha"] = sha_commit
+            st.session_state.global_messages[get_active_convo()]["repo_branch"] = repo_branch
             st.session_state.global_messages[get_active_convo()]["pull_date"] = datetime.datetime.now()
             st.toast(f"Repository {repo_name} (Commit SHA: {sha_commit}) has finished cloning and indexing.")
     return cloned and indexed
@@ -154,14 +156,19 @@ def continue_code_convo():
 
 def delete_convo(idx):
     """
-    Deletes a conversation from the history - also removes it from the sidebar as a result
+    Deletes a conversation from the history - also removes it from the sidebar as a result.
+    It also deletes any cloned repos at the path if it does exist.
     """
     curr_convo = get_active_convo()
     # If deleted conversation is the conversation that user is on
     if idx == curr_convo:
         if curr_convo != 0:
-            # Shift user off conversation if not the first conversation
-            curr_convo -= 1
+            # Shift user off conversation before popping if same idx
+            st.session_state.active_convo_idx -= 1
         else:
+            # Create new convo if same idx
             start_new_convo()
+    repo_path = st.session_state.global_messages[curr_convo].get("repo_path")
+    if repo_path:
+        git_helper.delete_downloaded_repo(repo_path)
     st.session_state.global_messages.pop(idx)

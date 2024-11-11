@@ -27,9 +27,11 @@ def render_sidebar():
                     repo_url = convos.get("repo")
                     if repo_url is not None:
                         repo_display_name = convos.get("repo_display_name")
+                        repo_branch = convos.get("repo_branch")
                         repo_commit_sha = convos.get("repo_commit_sha")
                         repo_owner = convos.get("repo_owner")
                         repo_pull_date = convos.get("pull_date")
+                        repo_path = convos.get("repo_path")
 
                         st.button(f"{repo_display_name}",
                                   on_click=update_callback, 
@@ -54,10 +56,12 @@ def render_sidebar():
                             # if button pressed for this idx
                             repo_details = ["**Detailed Information:**  "]
                             
-                            if repo_commit_sha and repo_owner and repo_pull_date:
+                            if repo_commit_sha and repo_owner and repo_path and repo_pull_date:
                                 repo_details.extend([f":gray[Owner: {repo_owner}]  ", 
                                                      f":gray[URL: {repo_url}]  ", 
+                                                     f":gray[Active Branch: {repo_branch}]  ", 
                                                      f":gray[Commit Hash: {repo_commit_sha}]  ", 
+                                                     f":gray[Repo Path: {repo_path}]  ", 
                                                      f":gray[Date: {repo_pull_date.strftime('%d %b %Y %X')}]  "])
                             else:
                                 repo_details.append("No details available...  ")

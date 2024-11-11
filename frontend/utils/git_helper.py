@@ -1,7 +1,6 @@
 import git 
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
 import requests
-import time
 import streamlit as st
 from pathlib import Path
 import shutil
@@ -129,6 +128,7 @@ def clone_repo(repo_url: str, clone_dir = "") -> Optional[os.PathLike]:
             return None 
     return None 
 
+
 def is_valid_github_repo(repo_url: str) -> bool:
     """
     Validate whether the provided URL is a valid GitHub repository.
@@ -147,8 +147,19 @@ def is_valid_github_repo(repo_url: str) -> bool:
     except requests.exceptions.RequestException:
         return False
 
+def delete_downloaded_repo(repo_path : os.PathLike) -> bool:
+    """
+    Will try to delete local repo if it exists
+    Returns true if success, false if it does not do so.
+    """
+    repo_dir = Path(repo_path)
+    if repo_dir.exists:
+        print(f"Deleting chat with existing repository at {repo_dir.resolve()}")
+        shutil.rmtree(repo_dir.resolve())
+        return True
+    return False
 
-def get_latest_commit_sha(repo_url: str, branch: str = "main") -> Optional[str]:
+def get_latest_commit_sha(repo_url: str, branch: str = "main") -> Tuple[Optional[str], Optional[str]]:
     """
     Get the latest commit SHA from the specified GitHub repository and branch.
     
@@ -157,7 +168,8 @@ def get_latest_commit_sha(repo_url: str, branch: str = "main") -> Optional[str]:
         branch (str): The branch to fetch the latest commit from (default is "main"). Might need to specify master if legacy
     
     Returns:
-        str: The SHA of the latest commit on the specified branch.
+        str: The SHA of the latest commit on the specified branch. None if 'main', 'master' and branch all fails.
+        str: The branch of which the commit info was successfully pulled from. None if 'main', 'master' and branch all fails.
     """
     owner, repo = get_repo_owner_name_from_url(repo_url) 
     
@@ -178,13 +190,19 @@ def get_latest_commit_sha(repo_url: str, branch: str = "main") -> Optional[str]:
         # Try the main branch first
         print(f"Trying 'main' branch after failure with '{branch}' branch.")
         commit_sha = fetch_commit("main")
+        branch = "main"
 
     if commit_sha is None and branch != 'master': 
         # If fetching from the branch fails, try the master branch
         print(f"Trying 'master' branch after failure with '{branch}' branch.")
         commit_sha = fetch_commit("master")
+        branch = "master"
 
-    return commit_sha
+    if commit_sha is None:
+        print(f"'{branch}' is likely not a valid branch of the repo.")
+        return None, None
+
+    return commit_sha, branch
 
 
 def get_latest_commit_sha_local(repo_path: str) -> Optional[str]:
