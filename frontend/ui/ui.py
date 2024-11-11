@@ -201,7 +201,20 @@ def get_user_chat_input():
         return prompt_msg
     return None 
 
-
+def display_clone_progress():
+    """
+    Display the current GitPython clone progress bar and status in Streamlit.
+    Currently unused due to GitPython progress issues.
+    """
+    progress = st.session_state.get("git", {}).get("clone_progress", 0.0)
+    message = st.session_state.get("git", {}).get("message", "Initializing clone...")
+    curr_op = st.session_state.get("git", {}).get("curr_op", "")
+    
+    st.write(f"Operation: {curr_op}")
+    st.write(f"Message: {message}")
+    
+    # Display Streamlit progress bar
+    st.progress(progress, text=f"{curr_op}: {message}")
 
 class DownloadButton():
     """

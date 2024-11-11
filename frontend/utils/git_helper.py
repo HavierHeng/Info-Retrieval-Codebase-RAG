@@ -1,8 +1,80 @@
 import git 
-from typing import Optional
+from typing import Optional, Union
 import requests
 import time
+import streamlit as st
 from pathlib import Path
+import shutil
+import os
+
+class STGitCloneProgress(git.RemoteProgress):
+    """
+    Updates a global streamlit status in session state for rendering.
+    To use this class, pass it into Gitpython's clone_from() method. 
+    Then in streamlit's session_state, download status is stored as session_state.git.clone_progress as a float from 0 to 1.0, and can be read for rendering using st.progress(). The current operation and message are stored in session_state.git.curr_op (as a human readable string) and session_state.git.message respectively.
+
+    This is current broken due to GitPython API being borked
+    """
+    OP_CODES = [
+        "BEGIN",
+        "CHECKING_OUT",
+        "COMPRESSING",
+        "COUNTING",
+        "END",
+        "FINDING_SOURCES",
+        "RECEIVING",
+        "RESOLVING",
+        "WRITING",
+    ]
+    OP_CODE_MAP = {
+        getattr(git.RemoteProgress, _op_code): _op_code for _op_code in OP_CODES
+    }
+    
+    def __init__(self):
+        # Initialize progress variables
+        super().__init__()
+        if "git" not in st.session_state:
+            st.session_state["git"] = {
+                "clone_progress": 0.0,
+                "curr_op": "",
+                "message": ""
+            }
+
+    @classmethod
+    def get_curr_op(cls, op_code: int) -> str:
+        """Get OP name from OP code."""
+        op_code_masked = op_code & cls.BEGIN | cls.END
+        return cls.OP_CODE_MAP.get(op_code_masked, "?").title()
+
+    def update(
+        self,
+        op_code: int,
+        cur_count: Union[str, float],
+        max_count: Optional[Union[str, float]] = None,
+        message: str = ''
+    ) -> None:
+        """Update Streamlit's progress bar and session state during Git operations."""
+        
+        if op_code & self.BEGIN:
+            # Starting operation, initialize progress and message
+            st.session_state["git"]["clone_progress"] = 0.0
+            st.session_state["git"]["curr_op"] = self.get_curr_op(op_code)
+            st.session_state["git"]["message"] = message
+            st.session_state["git"]["total"] = max_count
+        
+        if op_code & self.END:
+            # Operation ended
+            st.session_state["git"]["clone_progress"] = 1.0
+            st.session_state["git"]["message"] = f"{message} - Completed"
+
+        # Update progress
+        if max_count:
+            progress = float(cur_count) / float(max_count)
+            st.session_state["git"]["clone_progress"] = progress
+        
+        # Update the operation message (for user feedback)
+        st.session_state["git"]["message"] = message
+
 
 def get_repo_owner_name_from_url(repo_url: str) -> tuple[str, str]:
     """
@@ -28,9 +100,10 @@ def get_repo_owner_name_from_url(repo_url: str) -> tuple[str, str]:
 
     return owner, repo_name
 
-def clone_repo(repo_url: str, clone_dir = "") -> bool:
+def clone_repo(repo_url: str, clone_dir = "") -> Optional[os.PathLike]:
     """ 
-    Attempts to clone repo given the github URL and clone directory 
+    Attempts to clone repo given the github URL and clone directory.
+    Always overrides if repo already exists at path - for reasons to keep up to date as possible.
     """
     clone_path = Path(clone_dir)
 
@@ -39,18 +112,22 @@ def clone_repo(repo_url: str, clone_dir = "") -> bool:
         clone_path = Path(f"/tmp/{owner}/{repo_name}")  # TODO: This will break on Windows, *nix assumption
         clone_path.mkdir(parents=True, exist_ok=True)
 
+    if clone_path.exists:
+        print(f"Directory {clone_path.resolve()} already exists. Overriding the existing repository.")
+        shutil.rmtree(clone_path.resolve())
+
     if is_valid_github_repo(repo_url) and clone_path.exists:
         try:
             # Clone the repository to the specified directory
-            print(f"Cloning repository from {repo_url} into {clone_dir}...")
-            # TODO: Still in testing - spoof with sleep for now
-            # git.Repo.clone_from(repo_url, clone_dir)
-            time.sleep(2)
-            return True
+            print(f"Cloning repository from {repo_url} into {clone_path}...")
+            # time.sleep(4)  # For testing
+            # TODO: Progress broken due to GitPython API
+            git.Repo.clone_from(url=repo_url, to_path=clone_path.resolve())
+            return clone_path.resolve()
         except Exception as e:
             print(f"Error encountered while cloning repository: {e}")
-            return False
-    return False
+            return None 
+    return None 
 
 def is_valid_github_repo(repo_url: str) -> bool:
     """

@@ -26,6 +26,13 @@ def init_session_state():
             "process_repo": False
         }
 
+    # Git Clone Progress state - for rendering reasons
+    if "git" not in st.session_state:
+        st.session_state.git = {"clone_progress": 0,
+                                "curr_op": "",
+                                "message": ""
+                                }
+
     # Active conversation index - just keeps track of which conversation user is currently sending data to/rendering
     if "active_convo_idx" not in st.session_state:
         # First conversation - i.e just opened chatbot

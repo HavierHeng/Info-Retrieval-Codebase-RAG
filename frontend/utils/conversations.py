@@ -13,6 +13,7 @@ blank_convo = {"repo": None,
                "repo_display_name": "",
                "repo_owner": "",
                "repo_commit_sha": "", 
+               "repo_path": None, # Where is repo stored - as an OS.PathLike object
                "pull_date": None,  # Datetime for pulling repo
                "processed": False,  # Has repo been cloned and indexed?
                "sidebar_details": False,  # Show sidebar details?
@@ -91,8 +92,11 @@ def process_repository():
         repo_url = st.session_state.global_messages[get_active_convo()].get("repo")
         repo_name = st.session_state.global_messages[get_active_convo()].get("repo_display_name")
         with st.spinner(text="Cloning Repository..."):
+            # ui.display_clone_progress()
             cloned = git_helper.clone_repo(repo_url)
-            st.toast(f"Repository {repo_name} at {repo_url} cloned.")
+            if cloned:
+                st.toast(f"Repository {repo_name} at {repo_url} cloned.")
+                st.session_state.global_messages[get_active_convo()]["repo_path"] = cloned
 
         with st.spinner(text="Indexing repository..."):
             indexed = rag.index_repo()
