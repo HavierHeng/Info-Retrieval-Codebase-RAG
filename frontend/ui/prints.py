@@ -17,6 +17,6 @@ def fake_print_stream(response: str):
     """Makes normal text have a typewriter effect"""
     for word in response.split():
         yield word + " "
-        time.sleep(0.03)
+        time.sleep(0.05)
 
 

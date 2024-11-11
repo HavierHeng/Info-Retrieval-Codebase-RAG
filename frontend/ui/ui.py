@@ -198,7 +198,6 @@ def get_user_chat_input():
         # Save user input
         prompt_msg = {"role": "user", "content": prompt}
         # Increment input counter to keep buttons unique
-        st.toast(f"BINGUS: {prompt}")
         return prompt_msg
     return None 
 
