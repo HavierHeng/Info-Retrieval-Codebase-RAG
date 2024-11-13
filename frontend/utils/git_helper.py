@@ -101,6 +101,21 @@ def get_repo_owner_name_from_url(repo_url: str) -> tuple[str, str]:
 
     return owner, repo_name
 
+def get_local_repo_root_dir(repo_path: str) -> Optional[str]:
+    """
+    Given a local repo path - gets the root directory name.
+    Returns None if Git repo cannot be found
+    """
+    try:
+        git_repo = git.Repo(repo_path, search_parent_directories=True)
+        root_dir = git_repo.git.rev_parse("--show-toplevel")
+        return root_dir
+    except git.InvalidGitRepositoryError:
+        return None 
+    except git.NoSuchPathError:
+        return None 
+
+
 def clone_repo(repo_url: str, clone_dir = "") -> Optional[os.PathLike]:
     """ 
     Attempts to clone repo given the github URL and clone directory.
@@ -134,6 +149,21 @@ def clone_repo(repo_url: str, clone_dir = "") -> Optional[os.PathLike]:
     return None 
 
 
+def is_valid_local_git_repo(repo_path: str) -> bool:
+    """
+    Validate whether the provided local path contains a valid Git repository.
+    Checks if the repository exists by checking for a .git file in the root of the path to the repo given.
+    """
+    try:
+        # Attempt to initialize a Git repo object in the given path
+        repo_loc = Path(repo_path).resolve()  # Resolve to absolute path
+        _ = git.Repo(repo_loc)  # This will raise an exception if not a valid Git repo
+        return True
+    except git.InvalidGitRepositoryError:
+        return False
+    except git.NoSuchPathError:
+        return False
+
 def is_valid_github_repo(repo_url: str) -> bool:
     """
     Validate whether the provided URL is a valid GitHub repository.
@@ -164,7 +194,46 @@ def delete_downloaded_repo(repo_path : os.PathLike) -> bool:
         return True
     return False
 
-def get_latest_commit_sha(repo_url: str, branch: str = "main") -> Tuple[Optional[str], Optional[str]]:
+
+def get_latest_local_commit_sha(repo_path: str, branch_name: str = "main") -> Tuple[Optional[str], Optional[str]]:
+    """
+    Get the latest commit SHA from the local Git repository and its branch.
+    
+    Args:
+        repo_path (str): Git repository path
+        branch (str): The branch to fetch the latest commit from (default is "main"). Might need to specify master if legacy
+    
+    Returns:
+        str: The SHA of the latest commit on the specified branch. None if 'main', 'master' and branch all fails.
+        str: The branch of which the commit info was successfully pulled from. None if 'main', 'master' and branch all fails.
+    """
+    repo = git.Repo(repo_path)
+    all_branches = [branch.name for branch in repo.heads]
+    commit_sha = None
+
+    def branch_exists(branch_name):
+        return branch_name in all_branches
+
+    if branch_exists(branch_name):
+        branch = repo.heads[branch_name]
+        commit_sha = branch.commit.hexsha
+    else:  # branch doesn't exist, try main then master
+        for other_branch in ["main", "master"]:
+            if branch_exists(other_branch):
+                branch = repo.heads[other_branch]
+                branch_name = other_branch
+                commit_sha = branch.commit.hexsha
+                break
+
+    if commit_sha is None:
+        print(f"'{branch_name}', 'main' or 'master' are likely not a valid branches of the repo.")
+        return None, None
+
+    # Get the latest commit SHA for that branch
+    return commit_sha, branch_name
+
+
+def get_latest_remote_commit_sha(repo_url: str, branch: str = "main") -> Tuple[Optional[str], Optional[str]]:
     """
     Get the latest commit SHA from the specified GitHub repository and branch.
     
@@ -204,7 +273,7 @@ def get_latest_commit_sha(repo_url: str, branch: str = "main") -> Tuple[Optional
         branch = "master"
 
     if commit_sha is None:
-        print(f"'{branch}' is likely not a valid branch of the repo.")
+        print(f"'{branch}', 'main' or 'master' are likely not a valid branches of the repo.")
         return None, None
 
     return commit_sha, branch

@@ -10,20 +10,27 @@ def init_session_state():
     """
     Sets up global session state if not already set up.
     """
-# Global messages stores every conversation and their messages to display/provide as context to LLM
+    # Global messages stores every conversation and their messages to display/provide as context to LLM
     if "global_messages" not in st.session_state:
         st.session_state.global_messages = []
 
-    # Chat counters maintain a unique ID per st.chat_input()
-    if "chat_counter" not in st.session_state:
-        st.session_state.chat_counter = 0
+    # repo_path, repo_url and repo_name are used to animate the initial setup repo page
+    if "repo_path" not in st.session_state:
+        st.session_state.repo_path = ""  
+    if "repo_url" not in st.session_state:
+        st.session_state.repo_url = ""  
+    if "repo_name" not in st.session_state:
+        st.session_state.repo_name = ""  
+
+    if "is_remote_toggle" not in st.session_state:
+        st.session_state.is_remote_toggle = True  # defaults to remote
 
     # Animation Update states - since callbacks are not executed in order leading to weird behaviors
     # One solution is to set a state in a callback, then handle it in the main loop
     if "animation" not in st.session_state:
         st.session_state.animation = {
             "new_convo": False,
-            "process_repo": False
+            "process_repo": False,
         }
 
     # Git Clone Progress state - for rendering reasons

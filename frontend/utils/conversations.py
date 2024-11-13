@@ -11,7 +11,8 @@ import copy
 
 blank_convo = {"repo": None,
                "repo_display_name": "",
-               "repo_owner": "",
+               "is_remote": None,  # Is the repo remote or local? This affects the rendering of information
+               "repo_owner": "",  # Repo owner, none for local repos
                "repo_commit_sha": "", 
                "repo_branch": "",  # Which branch is indexed in the RAG system
                "repo_path": None, # Where is repo stored - as an OS.PathLike object
@@ -83,9 +84,33 @@ def setup_repo_convo():
             st.session_state.animation["process_repo"] = True
         
 
-def process_repository():
+def process_local_repository():
     """
-    Process the repository by pulling and indexing it.
+    Process the local repository by indexing it.
+    """
+    indexed = False
+    with st.chat_message("assistant"):
+        repo_path = st.session_state.global_messages[get_active_convo()].get("repo")
+        repo_name = st.session_state.global_messages[get_active_convo()].get("repo_display_name")
+        st.session_state.global_messages[get_active_convo()]["repo_path"] = repo_path
+
+        with st.spinner(text="Indexing local repository..."):
+            indexed = rag.index_repo()
+            st.toast(f"Repository {repo_name} at {repo_path} indexed.")
+
+        if indexed: 
+            st.write("Repository has been processed!")
+            sha_commit, repo_branch = git_helper.get_latest_local_commit_sha(repo_path)
+            st.session_state.global_messages[get_active_convo()]["repo_owner"] = git_helper.get_repo_owner_name_from_url(repo_path)[0]
+            st.session_state.global_messages[get_active_convo()]["repo_commit_sha"] = sha_commit
+            st.session_state.global_messages[get_active_convo()]["repo_branch"] = repo_branch
+            st.session_state.global_messages[get_active_convo()]["pull_date"] = datetime.datetime.now()
+            st.toast(f"Repository {repo_name} (Commit SHA: {sha_commit}) has finished cloning and indexing.")
+    return indexed
+
+def process_remote_repository():
+    """
+    Process the remote repository by pulling and indexing it.
     """
     cloned = False
     indexed = False
@@ -105,7 +130,7 @@ def process_repository():
 
         if cloned and indexed: 
             st.write("Repository has been processed!")
-            sha_commit, repo_branch = git_helper.get_latest_commit_sha(repo_url)
+            sha_commit, repo_branch = git_helper.get_latest_remote_commit_sha(repo_url)
             st.session_state.global_messages[get_active_convo()]["repo_owner"] = git_helper.get_repo_owner_name_from_url(repo_url)[0]
             st.session_state.global_messages[get_active_convo()]["repo_commit_sha"] = sha_commit
             st.session_state.global_messages[get_active_convo()]["repo_branch"] = repo_branch
@@ -154,10 +179,11 @@ def continue_code_convo():
         active_messages.pop(1)  # preserve system message at index 0
 
 
-def delete_convo(idx):
+def delete_convo(idx, is_remote):
     """
     Deletes a conversation from the history - also removes it from the sidebar as a result.
-    It also deletes any cloned repos at the path if it does exist.
+    It also deletes any cloned repos at the path if it does exist if its a remote repo.
+    Does not delete repos is its a local repo!
     """
     curr_convo = get_active_convo()
     # If deleted conversation is the conversation that user is on
@@ -170,5 +196,8 @@ def delete_convo(idx):
             start_new_convo()
     repo_path = st.session_state.global_messages[curr_convo].get("repo_path")
     if repo_path:
-        git_helper.delete_downloaded_repo(repo_path)
+        if is_remote:  # If remote, delete repo. 
+            git_helper.delete_downloaded_repo(repo_path)
+        else:  # Else if local, do not nuke the repo
+            print(f"Local repo, will not delete {repo_path}.")
     st.session_state.global_messages.pop(idx)
