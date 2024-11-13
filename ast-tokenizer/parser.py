@@ -3,7 +3,7 @@ from tree_sitter import Language, Parser
 import glob
 import os
 import argparse
-import gitpython
+# import gitpython
 import languages
 
 

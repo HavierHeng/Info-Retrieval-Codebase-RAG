@@ -144,7 +144,7 @@ def start_code_convo(curr_convo):
     This is the start of the second conversation that allows users to understand their codebase
     """
     assistant_init_msg = {"role": "assistant", 
-                          "content": f"Hello! I see you are interested in {st.session_state.global_messages[curr_convo]["repo_display_name"]}. How may I help you?"}
+                          "content": f"Hello! I see you are interested in {st.session_state.global_messages[curr_convo]['repo_display_name']}. How may I help you?"}
     starting_code_convo = [
         {"role": "system", 
          "content": rag.RAG_SYSTEM_PROMPT.format()},

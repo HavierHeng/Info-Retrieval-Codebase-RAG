@@ -11,6 +11,7 @@ __pycache__/
 .conda/
 envs/
 *.conda
+.venv
 
 # Python package manager files
 pip-wheel-metadata/

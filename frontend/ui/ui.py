@@ -60,14 +60,14 @@ def render_sidebar():
                             if is_remote:
                                 repo_details.extend([f":gray[Owner: {repo_owner}]  ", 
                                                      f":gray[Location: {repo_location}]  ", 
-                                                     f":gray[Local/Remote: {"Remote" if is_remote else "Local"}]  ",
+                                                     f":gray[Local/Remote: {'Remote' if is_remote else 'Local'}]  ",
                                                      f":gray[Active Branch: {repo_branch}]  ", 
                                                      f":gray[Commit Hash: {repo_commit_sha}]  ", 
                                                      f":gray[Local Path: {repo_path}]  ", 
                                                      f":gray[Date: {repo_pull_date.strftime('%d %b %Y %X')}]  "])
                             elif not is_remote:
                                 repo_details.extend([ f":gray[Location: {repo_location}]  ", 
-                                                     f":gray[Local/Remote: {"Remote" if is_remote else "Local"}]  ",
+                                                     f":gray[Local/Remote: {'Remote' if is_remote else 'Local'}]  ",
                                                      f":gray[Active Branch: {repo_branch}]  ", 
                                                      f":gray[Commit Hash: {repo_commit_sha}]  ", 
                                                      f":gray[Date: {repo_pull_date.strftime('%d %b %Y %X')}]  "])
