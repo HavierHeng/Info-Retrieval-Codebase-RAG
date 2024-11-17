@@ -54,18 +54,18 @@ You should have Python 3 installed before using this tokenizer. Verify this with
 
 The project is set up in a virtualenv (`venv`)
 1) Activate the virtualenv: 
-    - Windows: `ast-tokenizer/bin/activate` or `ast-tokenizer/bin/activate.ps1` if in powershell
-    - Linux/MacOS (based on shell): `source ast-tokenizer/bin/activate.sh`
+    - Windows: `.venv/bin/activate` or `ast-tokenizer/bin/activate.ps1` if in powershell
+    - Linux/MacOS (based on shell): `source .venv/bin/activate.sh`
 2) Check that environment is activated - terminal prompt should show something like
 ```
-(ast-tokenizer) $
+(.venv) $
 ```
 3) Install dependencies - `pip install -r requirements.txt`
 
 ## Execution
 
 The tokenizer can be run in two modes:
-1) As a library - this is for integration into other parts of the project flow - such as Langchain
+1) As a Langchain document loader - this is for integration into other parts of the project flow
 2) As a CLI tool - for parsing individual files
     - Command: `python parser.py` will print the options available 
 

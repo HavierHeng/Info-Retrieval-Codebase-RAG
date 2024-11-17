@@ -1,5 +1,10 @@
 # Source for python treesitter types: https://github.com/tree-sitter/tree-sitter-python/tree/master
-
+mapping = {
+        "function": "function_definition",
+        "class": "class_definition",
+        "method": "method_definition",
+        "type_def": "type_alias_declaration"
+    }
 src = bytes(
         """
 def foo():

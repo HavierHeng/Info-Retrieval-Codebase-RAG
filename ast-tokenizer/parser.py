@@ -3,11 +3,10 @@ from tree_sitter import Language, Parser
 import glob
 import os
 import argparse
-# import gitpython
 import languages
 
 
-# TODO: GITPYTHON - for pulling files
+
 # TODO: ARGPARSE - for cloning then parsing
 # TODO: GLOB FOR ONLY PYTHON FILES
 # TODO: FILE.READ() instead of bytes
