@@ -44,6 +44,23 @@ The output of the AST should aim to create individual source code blocks which r
 - e.g: a class named `Foo` is a document
 - e.g 2: a function named `Bar` is a document 
 
+## What currently exists in Langchain? - Novelty of solution
+
+In Langchain the following methods exist (the examples are for Python Language parsers):
+1) [LangChain Community - Python Document Loader](https://api.python.langchain.com/en/latest/document_loaders/langchain_community.document_loaders.python.PythonLoader.html)
+    - +: Parses into Langchain Document objects
+    - -: Just a file opener, based on their source code.
+    - -: Huge chunk sizes, require further text splitting to make sense of code.
+2) [LangChain - Recursive Character Text Splitter](https://python.langchain.com/docs/how_to/code_splitter/)
+    - +: Parses into Langchain Document objects
+    - -: Naive, splits by separators, so it can accidentally remove context, e.g for a class with many methods and a small chunk overlap, documents page_content can end up not including the class they belong to.
+    - -: No extra classification of code features. Only understands the raw syntax of code, without understanding its potential relations.
+3) [LangChain Community - Python Segmenter](https://api.python.langchain.com/en/latest/_modules/langchain_community/document_loaders/parsers/language/python.html#PythonSegmenter.simplify_code)
+    - +: Closest to what we need, uses AST to pick out function and class definitions via `extract_functions_classes()`. Also keeps statements not in class/function blocks via `simplify_code()`. (Was implenting this before discovering it exists)
+    - -: Does not create Langchain Document objects. This means that it fails to add metadata like file location, offsets where the source came from, type of code block and important details like important return values and so on. 
+
+These solutions are close but not enough. Python Segmenter is super close, yet falls short as it splits for text, without attaching metadata.
+
 ## Setup
 
 ## Pre-Requisites 
@@ -85,7 +102,5 @@ The current implementation mainly picks up top level classes and functions in ea
 
 [Tree Sitter Typescript](https://github.com/tree-sitter/tree-sitter-typescript/blob/master/common/define-grammar.js) for Typescript parsing
 
-[Tree Sitter Go](https://github.com/tree-sitter/tree-sitter-go) for Golang parsing
 
 
-[Tree Sitter Java](https://github.com/tree-sitter/tree-sitter-java) for Java parsing

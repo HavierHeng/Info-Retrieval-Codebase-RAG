@@ -1,49 +1,28 @@
-# Source for python treesitter types: https://github.com/tree-sitter/tree-sitter-python/tree/master
+# Source for python treesitter nodes: https://github.com/tree-sitter/tree-sitter-python/tree/master
+
+import tree_sitter_python as tspython
+from tree_sitter import Language, Parser
+from typing import AsyncIterable, Iterator
+from langchain_core.document_loaders import BaseLoader
+from langchain_core.documents import Document
+
+
 mapping = {
         "function": "function_definition",
         "class": "class_definition",
         "method": "method_definition",
         "type_def": "type_alias_declaration"
     }
-src = bytes(
-        """
-def foo():
-    if bar:
-        baz()
 
-def read_callable_byte_offset(byte_offset, point):
-    return src[byte_offset : byte_offset + 1]
+PY_LANGUAGE = Language(tspython.language())
 
+parser = Parser(PY_LANGUAGE)
 
-def read_callable_point(byte_offset, point):
-    row, column = point
-    if row >= len(src_lines) or column >= len(src_lines[row]):
-        return None
-    return src_lines[row][column:].encode("utf8")
-
-# https://tree-sitter.github.io/py-tree-sitter/classes/tree_sitter.Tree.html
-
-
-class Dumbass:
-    def __init__(self, dumb):
-        self.dumb = dumb
-    def yapper(self):
-        print("REEEEEEEEEEEEEEE")
-
-
-if __name__ == "__main__":
-    main()
-""",
-        "utf8"
-    )
-
-### TYPES I SAW
-# function_definition
-# class_definition
-# if_statement
-# comment
- 
-src_lines = ["\n", "def foo():\n", "    if bar:\n", "        baz()\n"]
+class PythonASTDocumentLoader(BaseLoader):
+    """
+    A smarter version of 
+    """
+   
 
 def read_callable_byte_offset(byte_offset, point):
     return src[byte_offset : byte_offset + 1]
@@ -110,23 +89,4 @@ def walk_tree(tree, original):
     # assert cursor.node.type == "parameters"
 
     cursor.goto_parent()
-    # assert cursor.node.type == "function_definition"
-    # What i want to get is
-    # 1) Byte offset of interesting bits - esp its name
-    # 2) 
-
-
-    # Testing so far
-    # Okay so interesting shits are
-    # Taking nodes children seem to move down the list
-    # From root node/module -> Sibling == going to next block
-    # From root node -> Child -> Child == first function def
-    
-
-    # What are all the datastructure
-    # Tree
-    # Node
-    # TreeCursor
-    # Point - idk
-
 
