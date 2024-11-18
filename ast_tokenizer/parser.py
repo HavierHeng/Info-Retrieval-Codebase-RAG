@@ -1,14 +1,11 @@
 import argparse
 from langchain_community.document_loaders import PythonLoader, DirectoryLoader
 from languages.python_ast import PythonASTDocumentLoader
-import warnings
-
-warnings.filterwarnings("ignore")
 from pprint import pprint
-
+import warnings
+warnings.filterwarnings("ignore")
 from langchain_community.document_loaders.generic import GenericLoader
 from langchain_community.document_loaders.parsers import LanguageParser
-from langchain_text_splitters import Language
 from functools import partial
 
 LANGUAGE_LOADERS  = {
@@ -67,11 +64,9 @@ def main():
         print(f"Loaded {len(documents)} documents from {args.directory} (file type: {args.file_type})")
         for i, document in enumerate(documents):
             print(f"---------Doc Meta {i}----------")
-            # pprint(document.metadata)
-            print(document.metadata["start_offset"], document.metadata["end_offset"])
-            print(document.metadata["block_name"], document.metadata["block_type"])
+            pprint(document.metadata)
             print(f"*---------Page Content {i}----------*")
-            # print(document.page_content)
+            print(document.page_content)
     except Exception as e:
         print(f"Error: {e}")
 

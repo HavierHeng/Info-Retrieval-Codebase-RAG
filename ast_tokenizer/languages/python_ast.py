@@ -84,6 +84,17 @@ class PythonASTDocumentLoader(BaseLoader):
             """
             Helper function to extract all docstrings and comments from the source code, from its start and end bytes
             """
+            def strip_single_line_comments(text: str):
+                # Strip the comment if it starts with "# "
+                if text.strip().startswith("#"):
+                    return text.lstrip("#").strip()  # Remove the "# " and any leading/trailing spaces
+                return text
+
+            def strip_docstring(text: str):
+                if text.startswith('"""') and text.endswith('"""'):
+                    return text[3:-3].strip()  # Remove the surrounding triple quotes
+                return text
+
             # Define a query to capture both line and block comments
             query = PYLANGUAGE.query("""
                 (comment) @comment
@@ -97,13 +108,13 @@ class PythonASTDocumentLoader(BaseLoader):
             if captures.get("comment") is not None:
                 for node in captures["comment"]:
                     comment_text = source_code[node.start_byte:node.end_byte].decode()
-                    comments.append(comment_text)
+                    comments.append(strip_single_line_comments(comment_text))
 
             docstrings = []
             if captures.get("docstring") is not None:
                 for node in captures["docstring"]:
                     docstring_text = source_code[node.start_byte:node.end_byte].decode()
-                    docstrings.append(docstring_text)
+                    docstrings.append(strip_docstring(docstring_text))
 
             return comments, docstrings
 
