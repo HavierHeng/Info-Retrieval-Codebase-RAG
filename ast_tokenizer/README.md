@@ -93,9 +93,9 @@ The tokenizer can be run in two modes:
 2) As a CLI tool - for parsing individual files
     - Command: `python parser.py` will print the options available 
 
-## TODOs/Missing features
-
-The current implementation mainly picks up top level classes and functions in each file. This might miss out some code from the source database.
+## TODOs
+- [ ] Package as a library
+- [ ] LLM metadata using local llm function calling
 
 ## Acknowledgements
 
