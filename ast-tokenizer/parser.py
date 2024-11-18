@@ -5,7 +5,7 @@ from langchain_community.document_loaders import PythonLoader, JavascriptLoader
 LANGUAGE_LOADERS  = {
         "py": PythonLoader,  # Default Loader - Reads Python files as is, without splitting
         "js": JavascriptLoader,
-        # "py-ast": 
+        # "py-ast":   # Custom Loader - Based on PythonSegmenter + Custom Treesitter
         # "js-ast":
 }
 

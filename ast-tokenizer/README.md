@@ -61,6 +61,8 @@ In Langchain the following methods exist (the examples are for Python Language p
 
 These solutions are close but not enough. Python Segmenter is super close, yet falls short as it splits for text, without attaching metadata.
 
+A custom DocumentLoader based on Treesitter and PythonSegmenter's design that returns Langchain `Document` files is made.
+
 ## Setup
 
 ## Pre-Requisites 
@@ -103,4 +105,5 @@ The current implementation mainly picks up top level classes and functions in ea
 [Tree Sitter Typescript](https://github.com/tree-sitter/tree-sitter-typescript/blob/master/common/define-grammar.js) for Typescript parsing
 
 
-
+### LangChain 
+[Article: How to create a custom Document Loader](https://python.langchain.com/docs/how_to/document_loader_custom/)

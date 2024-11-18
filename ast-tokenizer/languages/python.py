@@ -2,11 +2,14 @@
 
 import tree_sitter_python as tspython
 from tree_sitter import Language, Parser
-from typing import AsyncIterable, Iterator
+from typing import AsyncIterable, Iterator, Union 
+from pathlib import Path
 from langchain_core.document_loaders import BaseLoader
 from langchain_core.documents import Document
+from ast_metadata_schema import ASTProperties, 
 
 
+# TODO: Make this class generic for multiple languages that might share some traits e.g python and javascript and ruby, go and c++, java and C#
 mapping = {
         "function": "function_definition",
         "class": "class_definition",
@@ -15,16 +18,29 @@ mapping = {
     }
 
 PY_LANGUAGE = Language(tspython.language())
-
 parser = Parser(PY_LANGUAGE)
 
 class PythonASTDocumentLoader(BaseLoader):
     """
-    A smarter version of 
+    A smarter version of PythonLoader that uses Treesitter to parse its abstract syntax trees, and return Document objects that contain blocks (defined by functions or classes or any other structures). 
+
+    Non-function/classes blocks are categorized seperately.
     """
+
+    
+    def __init__(self, file_path: Union[str, Path]):
+        """
+        Initialize with a file path containg code.
+        """
+        self.file_path = file_path
+
+    def _generate_metadata(self):
+        return
+
+    def _simplify
    
 
-def read_callable_byte_offset(byte_offset, point):
+# def read_callable_byte_offset(byte_offset, point):
     return src[byte_offset : byte_offset + 1]
 
 
