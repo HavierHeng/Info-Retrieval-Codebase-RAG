@@ -6,7 +6,7 @@ from typing import AsyncIterable, Iterator, Union
 from pathlib import Path
 from langchain_core.document_loaders import BaseLoader
 from langchain_core.documents import Document
-from ast_metadata_schema import ASTProperties, 
+from metadata.ast_metadata_schema import 
 
 
 # TODO: Make this class generic for multiple languages that might share some traits e.g python and javascript and ruby, go and c++, java and C#
