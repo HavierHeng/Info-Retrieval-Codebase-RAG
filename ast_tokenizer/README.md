@@ -44,7 +44,7 @@ The output of the AST should aim to create individual source code blocks which r
 - e.g: a class named `Foo` is a document
 - e.g 2: a function named `Bar` is a document 
 
-## What currently exists in Langchain? - Novelty of solution
+## What currently exists in Langchain? And why still making own implementation - Novelty of solution
 
 In Langchain the following methods exist (the examples are for Python Language parsers):
 1) [LangChain Community - Python Document Loader](https://api.python.langchain.com/en/latest/document_loaders/langchain_community.document_loaders.python.PythonLoader.html)
@@ -58,10 +58,15 @@ In Langchain the following methods exist (the examples are for Python Language p
 3) [LangChain Community - Python Segmenter](https://api.python.langchain.com/en/latest/_modules/langchain_community/document_loaders/parsers/language/python.html#PythonSegmenter.simplify_code)
     - +: Closest to what we need, uses AST to pick out function and class definitions via `extract_functions_classes()`. Also keeps statements not in class/function blocks via `simplify_code()`. (Was implenting this before discovering it exists)
     - -: Does not create Langchain Document objects. This means that it fails to add metadata like file location, offsets where the source came from, type of code block and important details like important return values and so on. 
+4) [LangChain Community - Generic Loader](https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.generic.GenericLoader.html)
+    - +: Closest to what is needed, uses AST to pick out function and class defintions. Also does the same `simplify_code()` formatting as Segmenter.
+    - +: Creates Langchain Document objects.
+    - +: Has pretty good support out of the box for most languages.
+    - -: Metadata is lacking. It doesn't add enough data to generate citations, and lazily combines functions and classes together.
 
-These solutions are close but not enough. Python Segmenter is super close, yet falls short as it splits for text, without attaching metadata.
+These solutions are close but not enough. Python Segmenter and Generic Loader is super close, yet falls short as it splits for text, without attaching enough metadata for other uses.
 
-A custom DocumentLoader based on Treesitter and PythonSegmenter's design that returns Langchain `Document` files is made.
+A custom DocumentLoader based on Treesitter and PythonSegmenter's design that returns Langchain `Document` files is made. This serves as an experimentation platform for how much metadata is needed for retrieval.
 
 ## Setup
 
