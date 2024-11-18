@@ -1,4 +1,5 @@
-# Source for python treesitter nodes: https://github.com/tree-sitter/tree-sitter-python/tree/master
+# Reference for Langchain BaseLoader: https://python.langchain.com/docs/how_to/document_loader_custom/
+# Refernce for Treesitter-Python: https://github.com/tree-sitter/tree-sitter-python/tree/master
 
 import tree_sitter_python as tspython
 from tree_sitter import Language, Parser
@@ -6,8 +7,7 @@ from typing import AsyncIterable, Iterator, Union
 from pathlib import Path
 from langchain_core.document_loaders import BaseLoader
 from langchain_core.documents import Document
-from metadata.ast_metadata_schema import 
-
+from metadata.ast_metadata_schema import ASTGeneratedMetadata, LLMGeneratedMetadata, CodeDocumentMetadata, FullCodeDocumentMetadata
 
 # TODO: Make this class generic for multiple languages that might share some traits e.g python and javascript and ruby, go and c++, java and C#
 mapping = {
@@ -17,9 +17,6 @@ mapping = {
         "type_def": "type_alias_declaration"
     }
 
-PY_LANGUAGE = Language(tspython.language())
-parser = Parser(PY_LANGUAGE)
-
 class PythonASTDocumentLoader(BaseLoader):
     """
     A smarter version of PythonLoader that uses Treesitter to parse its abstract syntax trees, and return Document objects that contain blocks (defined by functions or classes or any other structures). 
@@ -27,17 +24,47 @@ class PythonASTDocumentLoader(BaseLoader):
     Non-function/classes blocks are categorized seperately.
     """
 
-    
+    PY_PARSER = Parser(Language(tspython.language()))
+
     def __init__(self, file_path: Union[str, Path]):
         """
-        Initialize with a file path containg code.
+        Initialize loader with a file path containg code.
         """
         self.file_path = file_path
 
-    def _generate_metadata(self):
-        return
+    def lazy_load(self) -> Iterator[Document]:
+        """A lazy loader that reads a file line by line.
 
-    def _simplify
+        When you're implementing lazy load methods, you should use a generator
+        to yield documents one by one.
+        """
+        line 
+        with open(self.file_path, encoding="utf-8") as f:
+            # TODO: Get all possible blocks
+            # TODO: Generate metadata for each block
+            # yield each document, add lines
+
+            yield Document(
+                page_content = line,
+                metadata = {}
+            )
+            line_number += 1
+
+
+    def _generate_metadata(self):
+        """
+        Given a metadata code 
+        """
+        code_metadata = CodeDocumentMetadata()
+        ast_metadata = ASTGeneratedMetadata(code_metadata)
+
+        return ast_metadata
+
+    def _simplify_code(self):
+
+    def _extract_functions_classes(self):
+
+
    
 
 # def read_callable_byte_offset(byte_offset, point):
