@@ -43,6 +43,8 @@ class ASTGeneratedMetadata(BaseModel):
 class FullCodeDocumentMetadata(BaseModel):
     """
     The DocumentLoader returns full metadata in the following schema, for use for general retrieval tasking (e.g contextual) or retrieval of citations (using paths and start/end offsets). 
+
+    AST and LLM generated data are separated, so that its easy to use one or the other.
     """
     ast_generated: ASTGeneratedMetadata
     llm_generated: LLMGeneratedMetadata

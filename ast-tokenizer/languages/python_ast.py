@@ -3,11 +3,12 @@
 
 import tree_sitter_python as tspython
 from tree_sitter import Language, Parser
-from typing import AsyncIterable, Iterator, Union 
+from typing import AsyncIterable, Iterator, Union, Optional
 from pathlib import Path
 from langchain_core.document_loaders import BaseLoader
 from langchain_core.documents import Document
-from metadata.ast_metadata_schema import ASTGeneratedMetadata, LLMGeneratedMetadata, CodeDocumentMetadata, FullCodeDocumentMetadata
+from langchain_text_splitters import TextSplitter
+from metadata.ast_metadata_schema import ASTGeneratedMetadata  
 
 # TODO: Make this class generic for multiple languages that might share some traits e.g python and javascript and ruby, go and c++, java and C#
 mapping = {
@@ -33,37 +34,46 @@ class PythonASTDocumentLoader(BaseLoader):
         self.file_path = file_path
 
     def lazy_load(self) -> Iterator[Document]:
-        """A lazy loader that reads a file line by line.
-
-        When you're implementing lazy load methods, you should use a generator
-        to yield documents one by one.
         """
-        line 
+        A lazy loader that reads code file code block by code block.
+        Yield documents representing a code block one by one.
+        """
         with open(self.file_path, encoding="utf-8") as f:
             # TODO: Get all possible blocks
+
             # TODO: Generate metadata for each block
             # yield each document, add lines
 
             yield Document(
-                page_content = line,
+                page_content = code_content,
                 metadata = {}
             )
-            line_number += 1
-
 
     def _generate_metadata(self):
         """
-        Given a metadata code 
+        Given a metadata code block, generate info about it
         """
-        code_metadata = CodeDocumentMetadata()
-        ast_metadata = ASTGeneratedMetadata(code_metadata)
+        ast_metadata = ASTGeneratedMetadata()
 
         return ast_metadata
 
-    def _simplify_code(self):
 
-    def _extract_functions_classes(self):
+    def _extract_block_offsets(self) -> Dict[str, List[int, int]]:
+        """
+        Extracts block types, either class/method/function/others. 
+        Returns as a dictionary of block types to the start and end offset of the block
+        """
 
+    def _simplify_code(self, text_splitter: Optional[TextSplitter] = None):
+        """
+        For code blocks with no categorization, e.g when they just sit in the global scope, these will be combined into one huge document. 
+
+        block will contain simplified code for other blocks through commenting.
+        """
+        return
+
+    def _extract_block_metadata(self):
+        return
 
    
 
