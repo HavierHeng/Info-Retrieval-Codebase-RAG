@@ -1,46 +1,77 @@
 import argparse
-import os
-from langchain_community.document_loaders import PythonLoader, JavascriptLoader
+from langchain_community.document_loaders import PythonLoader, DirectoryLoader
+from languages.python_ast import PythonASTDocumentLoader
+import warnings
+
+warnings.filterwarnings("ignore")
+from pprint import pprint
+
+from langchain_community.document_loaders.generic import GenericLoader
+from langchain_community.document_loaders.parsers import LanguageParser
+from langchain_text_splitters import Language
+from functools import partial
 
 LANGUAGE_LOADERS  = {
-        "py": PythonLoader,  # Default Loader - Reads Python files as is, without splitting
-        "js": JavascriptLoader,
-        # "py-ast":   # Custom Loader - Based on PythonSegmenter + Custom Treesitter
-        # "js-ast":
+    "py": [PythonLoader,  # Default Loader - Reads Python files as is, without splitting 
+           partial(GenericLoader.from_filesystem, glob="*", suffixes=[".py"], parser=LanguageParser()),
+           PythonASTDocumentLoader],  # Custom Loader - Based on PythonSegmenter + Custom Treesitter
+    "js": [partial(GenericLoader.from_filesystem, glob="*", suffixes=[".js"], parser=LanguageParser())]  # Default JS Loader
 }
 
-def load_documents(directory, file_type):
+def load_documents(directory, file_type, loader_choice):
     """
-    Load documents based on file type. 
+    Load documents based on file type and user-selected loader.
     """
     if file_type not in LANGUAGE_LOADERS:
         raise ValueError(f"Unsupported file type: {file_type}. Supported types: {', '.join(LANGUAGE_LOADERS.keys())}")
 
-    # Get the correct loader class based on file extension
-    loader_class = LANGUAGE_LOADERS[file_type]
-    loader = loader_class()  # Instantiate the loader
+    # Get the list of loaders for the specified file type
+    loaders = LANGUAGE_LOADERS[file_type]
     
-    # Load the documents from all matching files in the directory
-    documents = []
-    for filename in os.listdir(directory):
-        if filename.endswith(f".{file_type}"):
-            file_path = os.path.join(directory, filename)
-            documents.extend(loader.load(file_path))  # Adjust as per the actual loader's method
+    # Ensure that the loader choice is within the available options
+    if loader_choice < 0 or loader_choice >= len(loaders):
+        raise ValueError(f"Invalid loader choice. Please choose a number between 0 and {len(loaders) - 1}.")
+    
+    # Get the selected loader class
+    selected_loader_class = loaders[loader_choice]
+
+    # Set up the DirectoryLoader with the selected loader
+    loader = DirectoryLoader(directory, glob=f"*.{file_type}", loader_cls=selected_loader_class)
+    
+    # Load the documents
+    documents = loader.load()
     return documents
 
 def main():
-    # Setup argument parsing
+    # Set up argument parsing
     parser = argparse.ArgumentParser(description="Load documents from a directory")
     parser.add_argument('directory', type=str, help="The directory containing files to parse")
     parser.add_argument('file_type', choices=LANGUAGE_LOADERS.keys(), help="The language of code files")
     
     # Parse arguments
     args = parser.parse_args()
+
+    # List the available loaders for the selected file type
+    available_loaders = LANGUAGE_LOADERS[args.file_type]
+    print(f"Available loaders for {args.file_type} files:")
     
-    # Load documents based on input
+    for idx, loader in enumerate(available_loaders):
+        print(f"{idx}. {loader}")  # Display the loader class name
+
+    # Ask the user to choose a loader
+    loader_choice = int(input("Please select a loader by number: "))
+    
+    # Load documents using the selected loader
     try:
-        documents = load_documents(args.directory, args.file_type)
+        documents = load_documents(args.directory, args.file_type, loader_choice)
         print(f"Loaded {len(documents)} documents from {args.directory} (file type: {args.file_type})")
+        for i, document in enumerate(documents):
+            print(f"---------Doc Meta {i}----------")
+            # pprint(document.metadata)
+            print(document.metadata["start_offset"], document.metadata["end_offset"])
+            print(document.metadata["block_name"], document.metadata["block_type"])
+            print(f"*---------Page Content {i}----------*")
+            # print(document.page_content)
     except Exception as e:
         print(f"Error: {e}")
 
