@@ -12,6 +12,7 @@ py_mapping = {
     "module": "root"
 }
 
+PYLANGUAGE = Language(tspython.language())
 def extract_nodes(node: Node, source_code: bytes, parent_type: str = "root", parent_name: str = ""):
     def get_node_text(node: Node) -> str:
         """
@@ -19,26 +20,70 @@ def extract_nodes(node: Node, source_code: bytes, parent_type: str = "root", par
         """
         return source_code[node.start_byte: node.end_byte].decode()
 
+    def extract_function_calls(node: Node):
+        """
+        Helper function to extract all docstrings and comments from the source code, from its start and end bytes
+        """
+        query = PYLANGUAGE.query("""
+            (call) @function_call
+        """)
+
+        captures = query.captures(node)
+
+        function_calls = []
+        if captures.get("function_call") is not None:
+            for node in captures["function_call"]:
+                function_call_text = source_code[node.start_byte:node.end_byte].decode('utf-8')
+                function_calls.append(function_call_text)
+
+        return function_calls 
+
+    def extract_comments_docstrings(node: Node):
+        """
+        Helper function to extract all docstrings and comments from the source code, from its start and end bytes
+        """
+        # Define a query to capture both line and block comments
+        query = PYLANGUAGE.query("""
+            (comment) @comment
+            (expression_statement (string) @docstring)
+        """)
+
+        # Run the query on the node
+        captures = query.captures(node)
+
+        comments = []
+        if captures.get("comment") is not None:
+            for node in captures["comment"]:
+                comment_text = source_code[node.start_byte:node.end_byte]
+                comments.append(comment_text)
+
+        docstrings = []
+        if captures.get("docstring") is not None:
+            for node in captures["docstring"]:
+                docstring_text = source_code[node.start_byte:node.end_byte]
+                docstrings.append(docstring_text)
+
+        return comments, docstrings
+
     def extract_function_details(node: Node, parent_name: str):
         """
         Helper function to extract function details
         """
         # Get function name
         node_name = node.child_by_field_name("name")
-        if node_name is None: return None
+        if node_name is None: 
+            return None
         function_name = get_node_text(node_name)
 
         # Get function parameters
         arguments = []
         node_params = node.child_by_field_name("parameters")
-        if node_params is None:
-            return None
-
-        node_params = node_params.children
-        for arg in node_params:
-            if arg.type == "identifier":
-                if arg.text is not None:
-                    arguments.append(arg.text.decode("utf8"))
+        if node_params is not None:
+            node_params = node_params.children
+            for arg in node_params:
+                if arg.type == "identifier":
+                    if arg.text is not None:
+                        arguments.append(arg.text.decode("utf8"))
 
         # Get return variable
         return_variable = None
@@ -53,19 +98,10 @@ def extract_nodes(node: Node, source_code: bytes, parent_type: str = "root", par
                         return_variable = get_node_text(return_expr)  # Keep it as an expression, e.g., `x + y`
 
         # Find all function calls inside the function
-        functions_called = []
-        for child in node.children:
-            if child.type == "call_expression":  # Function call
-                function_calls = child.child_by_field_name("function")
-                if function_calls is not None:
-                    called_function_name = get_node_text(function_calls)
-                    functions_called.append(called_function_name)
+        functions_called = extract_function_calls(node)
 
         # Extract docstrings and comments
-        docstrings = []
-        for child in node.children:
-            if child.type == "string":
-                docstrings.append(get_node_text(child))
+        comments, docstrings = extract_comments_docstrings(node)
 
         return {
             "start_offset": node.start_byte,
@@ -77,12 +113,12 @@ def extract_nodes(node: Node, source_code: bytes, parent_type: str = "root", par
             "parent_name": parent_name,
             "return_var_ast": return_variable,
             "functions_called": functions_called,
-            "docstrings": docstrings
+            "docstrings": docstrings,
+            "comments": comments 
         }
 
     # Helper function to extract class details
     def extract_class_details(node: Node, parent_name: str):
-
         node_name = node.child_by_field_name("name")
         if node_name is None:
             return None
@@ -90,16 +126,15 @@ def extract_nodes(node: Node, source_code: bytes, parent_type: str = "root", par
 
         # Find methods in the class
         methods = []
-        for child in node.children:
-            if child.type == "function_definition":
-                methods.append(extract_function_details(child, class_name))
+        node_body = node.child_by_field_name("body")
+        if node_body is not None:
+            for child in node_body.children:
+                if child.type == "function_definition":
+                    methods.append(extract_function_details(child, class_name))
 
         # Extract docstrings and comments
-        docstrings = []
-        for child in node.children:
-            if child.type == "string":
-                docstrings.append(get_node_text(child))
-
+        comments, docstrings = extract_comments_docstrings(node)
+        
         # Extracting block_args from __init__  instead 
         block_args = []
         for method in methods:
@@ -116,7 +151,8 @@ def extract_nodes(node: Node, source_code: bytes, parent_type: str = "root", par
             "parent_type": parent_type,
             "parent_name": parent_name,
             "methods": methods,   # TODO: Might be too verbose
-            "docstrings": docstrings
+            "docstrings": docstrings,
+            "comments": comments
         }
 
     # Default block: handle other non-class and non-function blocks in global score (e.g if, with, for etc.)
@@ -124,18 +160,10 @@ def extract_nodes(node: Node, source_code: bytes, parent_type: str = "root", par
         functions_called = []
 
         # Find any function calls inside this block
-        for child in node.children:
-            if child.type == "call_expression":  # Function call in the block
-                function_calls = child.child_by_field_name("function")
-                if function_calls is not None:
-                    called_function_name = get_node_text(function_calls)
-                    functions_called.append(called_function_name)
+        functions_called = extract_function_calls(node)
 
         # Extract docstrings and comments
-        docstrings = []
-        for child in node.children:
-            if child.type == "string":
-                docstrings.append(get_node_text(child))
+        comments, docstrings = extract_comments_docstrings(node)
 
         return {
             "start_offset": node.start_byte,
@@ -146,58 +174,84 @@ def extract_nodes(node: Node, source_code: bytes, parent_type: str = "root", par
             "parent_type": parent_type,
             "parent_name": parent_name,
             "functions_called": functions_called,
-            "docstrings": docstrings
+            "docstrings": docstrings,
+            "comments": comments
         }
 
     result = []
     curr_name = ""  # Current name is the next node's parent name
+    processed = set()  # DFS - Prevent reprocessing of nodes
 
-    # For current node - process and add to result
-    match node.type:
-        case "function_definition":
-            details = extract_function_details(node, parent_name)
-            if details is not None:
-                curr_name = details["block_name"]
-                result.append(details)
-        case "class_definition":
-            details = extract_class_details(node, parent_name)
-            if details is not None:
-                curr_name = details["block_name"]
-                result.append(details)
-        case _:  # For non-function or non-class types, base case
-            details = extract_other_details(node, parent_name)
-            if details is not None:
-                curr_name = details["block_name"]
-                result.append(details)
-
-    # Base case for DFS recursion: Stop if the node has no children
+    # Base case for DFS recursion: Stop if the node has no children. 
     if not node.children:
         return result
+
+    def process_node(node):
+        # For current node - process and add to result if not already processed
+        if node in processed:
+            return None  # Skip node from reprocessing
+
+        # Add node otherwise - and process
+        processed.add(node)
+
+        match node.type:
+            case "function_definition":
+                details = extract_function_details(node, parent_name)
+                if details is not None:
+                    return details
+            case "class_definition":
+                details = extract_class_details(node, parent_name)
+                if details is not None:
+                    return details
+            case _:  # For non-function or non-class types, base case
+                details = extract_other_details(node, parent_name)
+                if details is not None:
+                    return details
+        return None
+
+    # Process current node and add to result
+    details = process_node(node)
+    if details is not None:
+        curr_name = details["block_name"]
+        result.append(details)
 
     # For child nodes - Recursively process all child nodes via DFS strategy, but only for relevant nodes
     for child in node.children:
         if child.type in ["function_definition", "class_definition"]:  # Only recurse on functions and classes
             result.extend(extract_nodes(child, source_code, parent_type=py_mapping[node.type], parent_name=curr_name))
         else:  # For non-relevant blocks, just extract their metadata (no further recursion)
-            result.append(extract_other_details(child, curr_name))
+            # Do I need to check for parent_type (i.e this curr node type) being function_def or class_def
+            if node.type not in ["function_definition", "class_definition"]:
+                result.append(extract_other_details(child, curr_name))
 
     # Sort by byte offset to ensure correct order
-    result.sort(key=lambda x: x.get("start_byte", 0))
+    result.sort(key=lambda x: x.get("start_offset", 0))
 
     return result
 
-def merge_others_metadata(node_metadata: List[Dict]):
+def merge_others_metadata(nodes_metadata: List[Dict], source_code: bytes) -> bytes:
     """
-    Given a list of dictionary of metadata - extracts all "others" node types and merges them, 
+    Given a list of dictionary of metadata - extracts all "others" node types and merges their code
     replacing any parts of the code where classes and functions were with "Code for: <func/class info>"
     """
-    return
+    others = []
+    for node_data in nodes_metadata:
+        match node_data["block_type"]:
+            case "others":  # Merge code
+                others.append(source_code[node_data["start_offset"]: node_data["end_offset"]])
+            case "function":
+                args = ", ".join(node_data["block_args"])
+                others.append(f"Code for: {node_data["block_name"]}({args})".encode())
+            case "class":
+                args = ", ".join(node_data["block_args"])
+                others.append(f"Code for: {node_data["block_name"]}({args})".encode())
+    # others.sort(key=lambda x: x.get("start_offset", 0))
+    return b"".join(others)
     
 def main():
     # In treesitter, a Parser is used to make a Tree
     # Parser is to be defined per language
-    py_language = Language(tspython.language())
-    parser = Parser(py_language)
+    parser = Parser(PYLANGUAGE)
     test_code = bytes(""" 
 import random
 import asyncio
@@ -211,6 +265,9 @@ with open('sample.txt', 'w') as f:
 
 # Call the function to read and print the file contents
 read_file('sample.txt')
+
+def invis():
+    return
 
 # Create a simple list and calculate the sum
 numbers = [1, 2, 3, 4, 5]
@@ -251,11 +308,12 @@ tomas.intro()
     tree = parser.parse(test_code)
     # pprint(ASTGeneratedMetadata.model_json_schema())
     all_nodes = extract_nodes(tree.root_node, test_code, "root", "")
-    pprint(all_nodes)
+    merged_nodes = merge_others_metadata(all_nodes, test_code)
+    print(merged_nodes)
     for i, node in enumerate(all_nodes):
         print(i)
-        if node["parent_name"] == "Person":
-            print(test_code[node['start_offset']:node['end_offset']])
+        pprint(node)
+        # print(parser.parse(test_code[node['start_offset']:node['end_offset']]).root_node)
 
 if __name__ == "__main__":
     main()
