@@ -16,9 +16,10 @@ JS_MAPPING = {
     "arrow_function": "function",
     "function_expression": "function",
     "class_declaration": "class",
+    "class_expression": "class",
     "program": "root",  # JS AST root is typically a "program"
     "method_definition": "method",
-    "variable_declaration": "variable",
+    "lexical_declaration": "variable",
     "expression_statement": "expression"
 }
 
@@ -36,9 +37,6 @@ class JavascriptASTDocumentLoader(BaseLoader):
             code_file_bytes = f.read()
             self.source_code = code_file_bytes
             tree = JS_PARSER.parse(code_file_bytes)
-            
-            self.current_position = 0
-            
             all_nodes_metadata = self.__extract_nodes(tree.root_node, code_file_bytes, "root", "")
             
             all_nodes_text, all_nodes_metadata = self.__simplify_metadata(all_nodes_metadata, code_file_bytes)
@@ -56,16 +54,17 @@ class JavascriptASTDocumentLoader(BaseLoader):
         if node.type not in JS_MAPPING:
             return False
             
-        if node.type in ["function_declaration", "function_expression", "arrow_function", "class_declaration", "class_expression", "method_definition"]:
+        if node.type in ["function_declaration", "function_expression", "arrow_function", "class_declaration", "class_expression", "method_definition", "lexical_declaration"]:
+            # Check for variable declarations that contain functions
+            if node.type == "lexical_declaration":
+                for child in node.children:
+                    if child.type == "lexical_declaration":
+                        value = child.child_by_field_name("value")
+                        if value and value.type in ["arrow_function", "function_expression"]:
+                            return True
+                        else:
+                            return False
             return True
-            
-        # Check for variable declarations that contain functions
-        if node.type == "variable_declaration":
-            for child in node.children:
-                if child.type == "variable_declarator":
-                    value = child.child_by_field_name("value")
-                    if value and value.type in ["arrow_function", "function_expression"]:
-                        return True
         return False
 
     def __extract_nodes(self, node: Node, source_code: bytes, parent_type: str = "root", parent_name: str = "") -> List[Dict]:
@@ -75,17 +74,20 @@ class JavascriptASTDocumentLoader(BaseLoader):
         Functions and classes are recursed, while others blocks are processed as is. Parent name (derived from recursion) and type (derived from the node) are based on the current nodes name and type.
         """
         result = []
-
-        # If current node is within the processable blocks - then try to process it
-        if self.__should_process_node(node):
-            node_metadata = self.__process_node(node, parent_name, parent_type)
-            if node_metadata:
-                self.current_position = node.end_byte
-                result.append(node_metadata)
+        node_metadata = self.__process_node(node, parent_name, parent_type)
+        curr_name = ""
+        if node_metadata:
+            curr_name = node_metadata["block_name"]
+            result.append(node_metadata)
 
         # Process children - via DFS recursion
         for child in node.children:
-            result.extend(self.__extract_nodes(child, source_code, JS_MAPPING.get(node.type, "root"), parent_name))
+            # Recurse on functions/classes
+            if self.__should_process_node(child):
+                result.extend(self.__extract_nodes(child, source_code, JS_MAPPING.get(node.type, "root"), parent_name))
+            else:
+                if not self.__should_process_node(node):
+                    result.append(self.__extract_other_details(child, parent_type=JS_MAPPING[node.type], parent_name=curr_name))
             
         return result
 
@@ -99,31 +101,35 @@ class JavascriptASTDocumentLoader(BaseLoader):
              return self.__extract_class_details(node, parent_name, parent_type)
          elif node.type == "method_definition":
              return self.__extract_method_details(node, parent_name, parent_type)
-         elif node.type == "variable_declaration":
+         elif node.type == "lexical_declaration":
              # Handle variable declarations containing functions
              for child in node.children:
                  if child.type == "variable_declarator":
                      value = child.child_by_field_name("value")
-                     if value and value.type in ["arrow_function", "function_expression"]:
-                         return self.__extract_function_details(value, parent_name, parent_type)
+                     if value:
+                        if value.type == "arrow_function":
+                            return self.__extract_arrow_details(node, parent_name, parent_type)
+                        if value.type == "function_expression":
+                            return self.__extract_function_details(value, parent_name, parent_type)
+         else:
+            return self.__extract_other_details(node, parent_name, parent_type)
          return None
 
     def __extract_function_details(self, node: Node, parent_name: str, parent_type: str) -> Optional[Dict]:
         """
         Extract function details like name, arguments, return variable, etc.
-        In Javascript, function_expression and method_definition is used by class methods, while function_declaration is used by function.
 
         Handles both function declarations and expressions.
+        In Javascript, function_expression and method_definition is used by class methods, while function_declaration is used by function.
+        Javascript functions can have no name. e.g function (a, b)
         """
-
-        # Handle different ways of getting function name based on declaration type
         name_node = node.child_by_field_name("name")
         if name_node:  # If there is a name, since js can have anon functions
             function_name = self.__get_node_text(name_node)
         else:
             # Try to get name from parent variable declaration - for anon func
             parent = node.parent
-            if parent and parent.type == "variable_declarator":
+            if parent and parent.type == "lexical_declaration":
                 name_node = parent.child_by_field_name("name")
                 if name_node:
                     function_name = self.__get_node_text(name_node)
@@ -155,11 +161,12 @@ class JavascriptASTDocumentLoader(BaseLoader):
     def __extract_arrow_details(self, node: Node, parent_name: str, parent_type: str) -> Optional[Dict]:
         """
         Extract details from arrow functions.
+        Has no name, so it assumes that of the parent variable
         """
         # Try to get name from parent variable declaration
         parent = node.parent
         function_name = "anonymous"
-        if parent and parent.type == "variable_declarator":
+        if parent and parent.type == "lexical_declaration":
             name_node = parent.child_by_field_name("name")
             if name_node:
                 function_name = self.__get_node_text(name_node)
@@ -226,6 +233,8 @@ class JavascriptASTDocumentLoader(BaseLoader):
             elif param.type == "formal_parameters":
                 # Handle destructured parameters
                 arguments.extend(self.__extract_destructured_params(param))
+            elif param.type == "assignment_pattern" or param.type == "object_pattern":
+                arguments.append(self.__get_node_text(param))
 
         return arguments
 
@@ -259,6 +268,8 @@ class JavascriptASTDocumentLoader(BaseLoader):
     def __extract_class_details(self, node: Node, parent_name: str, parent_type: str) -> Optional[Dict]:
         """
         Extract class details including its methods.
+        Class Declarations have a name
+        Class expressions can have no name - which will take the name of the parent variable instead
         """
         node_name = node.child_by_field_name("name")
         if node_name is None:
@@ -290,6 +301,27 @@ class JavascriptASTDocumentLoader(BaseLoader):
             "comments": comments
         }
 
+    def __extract_other_details(self, node: Node, parent_name: str, parent_type: str) -> Dict:
+        """
+        Extract metadata for non-class, non-function nodes (e.g., if-statements, loops).
+        """
+        functions_called = self.__extract_function_calls(node)
+        comments = self.__extract_comments(node)
+
+        return {
+            "relative_path": self.file_path,
+            "start_offset": node.start_byte,
+            "end_offset": node.end_byte,
+            "block_type": "others",
+            "block_name": f"Block at {node.start_byte}-{node.end_byte}",
+            "block_args": [],
+            "parent_type": parent_type,
+            "parent_name": parent_name,
+            "functions_called": functions_called,
+            "comments": comments
+        }
+
+
     def __extract_constructor_args(self, methods: List[Dict]) -> List[str]:
         """
         Extract arguments from the class's constructor method.
@@ -310,13 +342,16 @@ class JavascriptASTDocumentLoader(BaseLoader):
         """
         Extract the return variable from a function.
         """
-        return_variable = None
-        for child in node.children:
-            if child.type == "return_statement":
-                return_expr = child.children[0] if child.children else None
-                if return_expr and return_expr.type == "identifier":
-                    return_variable = self.__get_node_text(return_expr)
-        return return_variable
+        query = JS_LANGUAGE.query("""
+            (return_statement) @function_return
+        """)
+        captures = query.captures(node)
+        result = captures.get("function_return")
+        if result:
+            return_expr = result[0].child(1)
+            if return_expr:
+                return self.__get_node_text(return_expr)
+        return None
 
     def __extract_function_calls(self, node: Node) -> List[str]:
         """
@@ -392,6 +427,7 @@ class JavascriptASTDocumentLoader(BaseLoader):
         
         # Sort ranges to make it easier to iterate
         block_ranges.sort()
+        # TODO: Add processing for others blocks in Global Scope
 
         # Process blocks (functions, classes, methods)
         for node_data in nodes_metadata:
@@ -415,7 +451,7 @@ class JavascriptASTDocumentLoader(BaseLoader):
                     all_nodes.append(method)
                     all_nodes_text.append(method_text)
             else:
-                # Handle regular functions and other blocks
+                # Handle other blocks
                 node_text = source_code[node_data["start_offset"]:node_data["end_offset"]].decode()
                 all_nodes.append(node_data)
                 all_nodes_text.append(node_text)
