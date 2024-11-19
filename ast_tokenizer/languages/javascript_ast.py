@@ -32,79 +32,81 @@ class JavascriptASTDocumentLoader(BaseLoader):
         self.file_path = file_path
 
     def lazy_load(self) -> Iterator[Document]:
-        """
-        A lazy loader that reads code file block by block.
-        """
         with open(self.file_path, "rb") as f:
             code_file_bytes = f.read()
             self.source_code = code_file_bytes
             tree = JS_PARSER.parse(code_file_bytes)
+            
+            self.current_position = 0
+            
             all_nodes_metadata = self.__extract_nodes(tree.root_node, code_file_bytes, "root", "")
+            
             all_nodes_text, all_nodes_metadata = self.__simplify_metadata(all_nodes_metadata, code_file_bytes)
             
             for node_text, node_metadata in zip(all_nodes_text, all_nodes_metadata):
                 yield Document(page_content=node_text, metadata=node_metadata)
 
+    def __should_process_node(self, node: Node) -> bool:
+        """
+        Determine if a node should be processed as a block.
+        This is so that nodes that are not blocks - i.e in global scope are skipped instead of processed unnecessarily.
+
+        This also deals with the special case where variable declaration contains functions - cos thanks javascript.
+        """
+        if node.type not in JS_MAPPING:
+            return False
+            
+        if node.type in ["function_declaration", "function_expression", "arrow_function", "class_declaration", "class_expression", "method_definition"]:
+            return True
+            
+        # Check for variable declarations that contain functions
+        if node.type == "variable_declaration":
+            for child in node.children:
+                if child.type == "variable_declarator":
+                    value = child.child_by_field_name("value")
+                    if value and value.type in ["arrow_function", "function_expression"]:
+                        return True
+        return False
+
     def __extract_nodes(self, node: Node, source_code: bytes, parent_type: str = "root", parent_name: str = "") -> List[Dict]:
         """
-        Extract nodes recursively from the AST and return a list of node metadata.
+        Extract nodes recursively from the AST and return a list of node metadata using DFS strategy.
+
+        Functions and classes are recursed, while others blocks are processed as is. Parent name (derived from recursion) and type (derived from the node) are based on the current nodes name and type.
         """
-        def process_node(node):
-            """
-            Process a node based on its type and return its metadata.
-            """
-            if node.type not in JS_MAPPING:
-                return None
-
-            # Skip root node from being processed
-            if JS_MAPPING[node.type] == "root":
-                return None
-
-            node_metadata = None
-            match node.type:
-                case "function_declaration":
-                    node_metadata = self.__extract_function_details(node, parent_name, parent_type)
-                case "arrow_function" :
-                    node_metadata = self.__extract_arrow_details(node, parent_name, parent_type)
-                case "class_declaration":
-                    node_metadata = self.__extract_class_details(node, parent_name, parent_type)
-                case "method_definition":
-                    node_metadata = self.__extract_method_details(node, parent_name, parent_type)
-                case _:
-                    node_metadata = self.__extract_other_details(node, parent_name, parent_type)
-
-            return node_metadata
-
-        def process_child_nodes(node, curr_name):
-            """
-            Process child nodes recursively via DFS strategy based on their type. 
-            Functions and classes are recursed, while others blocks are processed as is. Parent name (derived from recursion) and type (derived from the node) are based on the current nodes name and type.
-            """
-            result = []
-            for child in node.children:
-                # Handle both function declarations and expressions
-                if child.type in ["function_declaration", "function_expression", "arrow_function", "class_declaration"]:
-                    result.extend(self.__extract_nodes(child, source_code, parent_type=JS_MAPPING[node.type], parent_name=curr_name))
-                else:
-                    if node.type not in ["function_declaration", "function_expression", "arrow_function", "class_declaration"]:
-                        result.append(self.__extract_other_details(child, parent_type=JS_MAPPING[node.type], parent_name=curr_name))
-            return result
-
-        # Start processing the current node and add to result
-        node_metadata = process_node(node)
         result = []
-        curr_name = ""
-        if node_metadata is not None:
-            curr_name = node_metadata["block_name"]
-            result.append(node_metadata)
 
-        # Process child nodes recursively
-        result.extend(process_child_nodes(node, curr_name))
+        # If current node is within the processable blocks - then try to process it
+        if self.__should_process_node(node):
+            node_metadata = self.__process_node(node, parent_name, parent_type)
+            if node_metadata:
+                self.current_position = node.end_byte
+                result.append(node_metadata)
 
-        # Sort nodes by start byte offset to ensure correct order
-        result.sort(key=lambda x: x.get("start_offset", 0))
-
+        # Process children - via DFS recursion
+        for child in node.children:
+            result.extend(self.__extract_nodes(child, source_code, JS_MAPPING.get(node.type, "root"), parent_name))
+            
         return result
+
+    def __process_node(self, node: Node, parent_name: str, parent_type: str) -> Optional[Dict]:
+         """Process a node based on its type and return metadata."""
+         if node.type in ["function_declaration", "function_expression"]:
+             return self.__extract_function_details(node, parent_name, parent_type)
+         elif node.type == "arrow_function":
+             return self.__extract_arrow_details(node, parent_name, parent_type)
+         elif node.type in ["class_declaration", "class_expression"]:
+             return self.__extract_class_details(node, parent_name, parent_type)
+         elif node.type == "method_definition":
+             return self.__extract_method_details(node, parent_name, parent_type)
+         elif node.type == "variable_declaration":
+             # Handle variable declarations containing functions
+             for child in node.children:
+                 if child.type == "variable_declarator":
+                     value = child.child_by_field_name("value")
+                     if value and value.type in ["arrow_function", "function_expression"]:
+                         return self.__extract_function_details(value, parent_name, parent_type)
+         return None
 
     def __extract_function_details(self, node: Node, parent_name: str, parent_type: str) -> Optional[Dict]:
         """
@@ -115,19 +117,22 @@ class JavascriptASTDocumentLoader(BaseLoader):
         """
 
         # Handle different ways of getting function name based on declaration type
-        node_name = None
-        if node.type == "function_declaration":
-            node_name = node.child_by_field_name("name")
-        else:  # function_expression
-            # Try to get name from parent variable declaration if it exists
+        name_node = node.child_by_field_name("name")
+        if name_node:  # If there is a name, since js can have anon functions
+            function_name = self.__get_node_text(name_node)
+        else:
+            # Try to get name from parent variable declaration - for anon func
             parent = node.parent
             if parent and parent.type == "variable_declarator":
-                node_name = parent.child_by_field_name("name")
-        
-        if node_name is None:
-            return None
+                name_node = parent.child_by_field_name("name")
+                if name_node:
+                    function_name = self.__get_node_text(name_node)
+                # Orphaned anon function
+                else:
+                    function_name = "anonymous"
+            else:
+                function_name = "anonymous"
             
-        function_name = self.__get_node_text(node_name)
         arguments = self.__extract_function_arguments(node)
         return_variable = self.__extract_return_variable(node)
         functions_called = self.__extract_function_calls(node)
@@ -294,26 +299,6 @@ class JavascriptASTDocumentLoader(BaseLoader):
                 return method["block_args"]
         return []    
 
-    def __extract_other_details(self, node: Node, parent_name: str, parent_type: str) -> Dict:
-        """
-        Extract metadata for non-class, non-function nodes (e.g., if-statements, loops).
-        """
-        functions_called = self.__extract_function_calls(node)
-        comments = self.__extract_comments(node)
-
-        return {
-            "relative_path": self.file_path,
-            "start_offset": node.start_byte,
-            "end_offset": node.end_byte,
-            "block_type": "others",
-            "block_name": f"Block at {node.start_byte}-{node.end_byte}",
-            "block_args": [],
-            "parent_type": parent_type,
-            "parent_name": parent_name,
-            "functions_called": functions_called,
-            "comments": comments
-        }
-
     def __get_node_text(self, node: Node) -> str:
         """
         Get text from a node in the AST.
@@ -349,23 +334,31 @@ class JavascriptASTDocumentLoader(BaseLoader):
 
     def __extract_comments(self, node: Node) -> List[str]:
         """
-        Extract comments from a node.
+        Extract all comments from a node.
+        Javascript has two types of comments - single lines and multilines
         """
-        def strip_comments(text: str) -> str:
-            if text.strip().startswith("//"):
-                return text.lstrip("//").strip()
-            if text.startswith('/*') and text.endswith('*/'):
-                return text[2:-2].strip()
-            return text
-
-        query = JS_LANGUAGE.query("""
-            (comment) @comment
-        """)
+        # Define a query to match comments
+        query_string = """
+        (comment) @comment
+        """
+        query = JS_LANGUAGE.query(query_string)
+        
+        # Get all comments within the node's range
         captures = query.captures(node)
-
-        comments = [strip_comments(self.__get_node_text(c)) for c in captures.get("comment", [])]
-
-        return comments 
+        comments = []
+        if captures.get("comment"): 
+            for capture in captures["comment"]:
+                comment_text = self.__get_node_text(capture)
+                # Clean up the comment text
+                if comment_text.startswith('//'):
+                    comment_text = comment_text[2:].strip()
+                elif comment_text.startswith('/*') and comment_text.endswith('*/'):
+                    comment_text = comment_text[2:-2].strip()
+                
+                if comment_text:
+                    comments.append(comment_text)
+        
+        return comments
 
     def __simplify_metadata(
         self,
@@ -376,117 +369,120 @@ class JavascriptASTDocumentLoader(BaseLoader):
         """
         Simplify metadata by combining "others" nodes (which represent code blocks in global scope) into one document, flattening class methods into their own documents and and using a text splitter on the large "others" block if provided.
 
-        Parts of the code where classes and functions were are replaced with "Code for: <func/class info>"
+        Code blocks if containing some other block have a stand in "// Code for ..." format:
+        - Classes: "// Code for class: name(params)"
+        - Methods: "// Code for class.method(params)"
+        - Functions: "// Code for function: name(params)"
 
         The metadata is returned in the order of appearance in the code.
 
         PS: This class is the messy part of the code since it does metadata formatting.
         """
+
         if not nodes_metadata:
             return [], []
 
         all_nodes = []
-        others = []
-        others_metadata = {
-            "relative_path": self.file_path,
-            "start_offset": nodes_metadata[0]["start_offset"],
-            "end_offset": nodes_metadata[-1]["end_offset"],
-            "block_type": "others",
-            "block_name": "Combined Others",
-            "block_args": [],
-            "parent_type": "root",
-            "parent_name": "root",
-            "functions_called": [],
-            "docstrings": [],
-            "comments": []
-        }
-        # Sort nodes by their start offset if not already sorted
-        nodes_metadata.sort(key=lambda x: x.get("start_offset", 0))
-
-        # Gather all function/class nodes code blocks as bytes
         all_nodes_text = []
+        
+        # Create a list of all block ranges to identify "others" content
+        block_ranges = []
+        for node in nodes_metadata:
+            block_ranges.append((node["start_offset"], node["end_offset"]))
+        
+        # Sort ranges to make it easier to iterate
+        block_ranges.sort()
+        
+       
+        # TODO: Get and combine "others" content 
+        # others_text = b"\n".join(self.others_content).decode()
+        # if others_text.strip():
+        #    others_metadata = {
+        #        "relative_path": self.file_path,
+        #        "start_offset": 0,
+        #        "end_offset": len(source_code),
+        #        "block_type": "others",
+        #        "block_name": "Global Scope",
+        #        "block_args": [],
+        #        "parent_type": "root",
+        #        "parent_name": "",
+        #        "functions_called": [],
+        #        "comments": self.__extract_comments(JS_PARSER.parse(source_code).root_node)
+        #        }
 
+        #    # Apply text splitter if provided, and put a global label
+        #    global_texts, global_metadata = self.__process_global_scope(others_text, others_metadata, text_splitter)
+        #    all_nodes.extend(global_metadata)
+        #    all_nodes_text.extend(global_texts)
+
+        # Process blocks (functions, classes, methods)
         for node_data in nodes_metadata:
-            match node_data["block_type"]:
-                case "others":  # Merge code
-                    # Append all functions and comments to 'others_metadata'
-                    self.__merge_others_metadata(others_metadata, node_data)
-                    others.append(source_code[node_data["start_offset"]: node_data["end_offset"]] + b'\n')
+            if node_data["block_type"] == "class":
+                # For classes, we want to replace method implementations with summaries
+                class_text = source_code[node_data["start_offset"]:node_data["end_offset"]].decode()
+                methods = node_data.get("methods", [])
+                
+                # Replace each method implementation with a summary line
+                for method in methods:
+                    method_text = source_code[method["start_offset"]:method["end_offset"]].decode()
+                    method_summary = f"# Code for {method['block_type']}: {method['parent_name']}.{method['block_name']}({', '.join(method['block_args'])})\n"
+                    class_text = class_text.replace(method_text, method_summary)
+                
+                all_nodes.append(node_data)
+                all_nodes_text.append(class_text)
+                
+                # Add methods as separate documents
+                for method in methods:
+                    method_text = source_code[method["start_offset"]:method["end_offset"]].decode()
+                    all_nodes.append(method)
+                    all_nodes_text.append(method_text)
+            else:
+                # Handle regular functions and other blocks
+                node_text = source_code[node_data["start_offset"]:node_data["end_offset"]].decode()
+                all_nodes.append(node_data)
+                all_nodes_text.append(node_text)
 
-                case "function" | "class":
-                    # Generate "Code for: " statements using the helper method
-                    code_for_str = self.__generate_code_for_block(node_data).encode()
-                    others.append(code_for_str)
-
-                    # Handle 'class' blocks, including methods
-                    if node_data["block_type"] == "class":
-                        node_methods = node_data.get("methods", [])
-                        if node_methods:
-                            # Set the end point of class as the start point of the first method if any
-                            node_data["end_offset"] = node_methods[0]["start_offset"]
-
-                        # Add the class code text
-                        node_text = [source_code[node_data["start_offset"]: node_data["end_offset"]]]
-
-                        for node_method in node_methods:
-                            # Add methods as their own standalone entries
-                            all_nodes.append(node_method)
-                            all_nodes_text.append(source_code[node_method["start_offset"]: node_method["end_offset"]])
-
-                            method_code_for_str = self.__generate_code_for_block(node_method).encode()
-                            node_text.append(method_code_for_str)
-                            others.append(method_code_for_str)
-
-                        all_nodes.append(node_data)
-                        all_nodes_text.append(b"".join(node_text).decode())
-                    else:
-                        all_nodes.append(node_data)
-
-        # Merge all 'others' code blocks into one document
-        others_doc = b"".join(others)
-        others_doc_text = others_doc.decode()
-
-        # Apply the text splitter if provided
-        if text_splitter:
-            others_doc_text = self.__apply_text_splitter(others_doc_text, text_splitter)
-            others_metadata = [others_metadata for _ in range(len(others_doc_text))]  # Clone metadata for each chunk
-        else:
-            others_doc_text = [others_doc_text]
-            others_metadata = [others_metadata]
-
-        # Combine all nodes
-        all_nodes.extend(others_metadata)
-        all_nodes_text.extend(others_doc_text)
-
-        # Sort nodes by 'start_offset'
+        # Sort nodes by start_offset to maintain original code order
         sorted_nodes = sorted(zip(all_nodes_text, all_nodes), key=lambda x: x[1]["start_offset"])
         all_nodes_text, all_nodes = zip(*sorted_nodes)
 
         return list(all_nodes_text), list(all_nodes)
 
-    def __merge_others_metadata(self, others_metadata: Dict, node_data: Dict) -> None:
-        """
-        Append functions_called, docstrings, and comments from the "others" node data into the given metadata.
-        """
-        for key in ["functions_called", "docstrings", "comments"]:
-            others_metadata[key] += node_data.get(key, [])
-
-    def __generate_code_for_block(self, node_data: Dict) -> str:
-        """
-        Generate "Code for: " statements for blocks of type function/class.
-        """
-        args = ", ".join(node_data["block_args"])
-        return f"# Code for {node_data['block_type']}: {node_data['block_name']}({args})\n"
-
-    def __apply_text_splitter(self, text: str, text_splitter: RecursiveCharacterTextSplitter) -> List[str]:
+    def __process_global_scope(
+        self,
+        others_text: str,
+        others_metadata: Dict,
+        text_splitter: Optional[RecursiveCharacterTextSplitter] = None
+    ) -> Tuple[List[str], List[Dict]]:
         """
         Apply the text splitter to the provided text.
+        Adds a comment to identify which block this code belongs from
         """
-        if isinstance(text_splitter, type):
-            splitter = text_splitter.from_language(language=langchain_text_splitters.Language.PYTHON,
-                                                   chunk_size=256,
-                                                   chunk_overlap=16)
-        else:
-            splitter = text_splitter
-        return splitter.split_text(text)
+        processed_texts = []
+        processed_metadata = []
+        
+        # Add "Code for" prefix for Global Scope
+        global_scope_code = "// Code for Global Scope\n" + others_text
 
+        # Apply text splitter if provided
+        if text_splitter:
+            # Initialize the splitter based on whether it's a class or instance
+            if isinstance(text_splitter, type):
+                splitter = text_splitter.from_language(language=langchain_text_splitters.Language.JS)
+            else:
+                splitter = text_splitter
+                
+            # Split the text and process chunks
+            others_chunks = splitter.split_text(global_scope_code)
+            for i, chunk in enumerate(others_chunks, 1):
+                # For split chunks, add chunk number to distinguish them
+                chunk_prefix = f"// Code for Global Scope (Part {i})\n"
+                if not chunk.startswith("// Code for"):  # Avoid double prefix
+                    chunk = chunk_prefix + chunk
+                processed_metadata.append(others_metadata.copy())
+                processed_texts.append(chunk)
+        else:
+            processed_metadata.append(others_metadata)
+            processed_texts.append(global_scope_code)
+            
+        return processed_texts, processed_metadata

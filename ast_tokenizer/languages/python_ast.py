@@ -295,7 +295,7 @@ class PythonASTDocumentLoader(BaseLoader):
             "start_offset": nodes_metadata[0]["start_offset"],
             "end_offset": nodes_metadata[-1]["end_offset"],
             "block_type": "others",
-            "block_name": "Combined Others",
+            "block_name": "Global Scope",
             "block_args": [],
             "parent_type": "root",
             "parent_name": "root",
@@ -317,7 +317,6 @@ class PythonASTDocumentLoader(BaseLoader):
                     others.append(source_code[node_data["start_offset"]: node_data["end_offset"]] + b'\n')
 
                 case "function" | "class":
-                    # Generate "Code for: " statements using the helper method
                     code_for_str = self.__generate_code_for_block(node_data).encode()
                     others.append(code_for_str)
 
@@ -379,7 +378,11 @@ class PythonASTDocumentLoader(BaseLoader):
         Generate "Code for: " statements for blocks of type function/class.
         """
         args = ", ".join(node_data["block_args"])
-        return f"# Code for {node_data['block_type']}: {node_data['block_name']}({args})\n"
+
+        if node_data["parent_type"] == "class":  # Class method
+            return f"# Code for {node_data['block_type']}: {node_data['parent_name']}.{node_data['block_name']}({args})\n"
+        else:  # Normal function/class
+            return f"# Code for {node_data['block_type']}: {node_data['block_name']}({args})\n"
 
     def __apply_text_splitter(self, text: str, text_splitter: RecursiveCharacterTextSplitter) -> List[str]:
         """
