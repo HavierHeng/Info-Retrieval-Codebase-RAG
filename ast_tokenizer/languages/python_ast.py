@@ -345,20 +345,11 @@ class PythonASTDocumentLoader(BaseLoader):
                         all_nodes.append(node_data)
 
         # Merge all 'others' code blocks into one document
-        others_doc = b"".join(others)
-        others_doc_text = others_doc.decode()
+        others_combined_text = b"".join(others).decode()
+        others_combined_text, others_metadata = self.__process_global_scope(others_combined_text, others_metadata, text_splitter)
 
-        # Apply the text splitter if provided
-        if text_splitter:
-            others_doc_text = self.__apply_text_splitter(others_doc_text, text_splitter)
-            others_metadata = [others_metadata for _ in range(len(others_doc_text))]  # Clone metadata for each chunk
-        else:
-            others_doc_text = [others_doc_text]
-            others_metadata = [others_metadata]
-
-        # Combine all nodes
         all_nodes.extend(others_metadata)
-        all_nodes_text.extend(others_doc_text)
+        all_nodes_text.extend(others_combined_text)
 
         # Sort nodes by 'start_offset'
         sorted_nodes = sorted(zip(all_nodes_text, all_nodes), key=lambda x: x[1]["start_offset"])
@@ -384,15 +375,41 @@ class PythonASTDocumentLoader(BaseLoader):
         else:  # Normal function/class
             return f"# Code for {node_data['block_type']}: {node_data['block_name']}({args})\n"
 
-    def __apply_text_splitter(self, text: str, text_splitter: RecursiveCharacterTextSplitter) -> List[str]:
+    def __process_global_scope(
+        self,
+        others_text: str,
+        others_metadata: Dict,
+        text_splitter: Optional[RecursiveCharacterTextSplitter] = None
+    ) -> Tuple[List[str], List[Dict]]:
         """
         Apply the text splitter to the provided text.
+        Adds a comment to identify which block this code belongs from
         """
-        if isinstance(text_splitter, type):
-            splitter = text_splitter.from_language(language=langchain_text_splitters.Language.PYTHON,
-                                                   chunk_size=256,
-                                                   chunk_overlap=16)
-        else:
-            splitter = text_splitter
-        return splitter.split_text(text)
+        processed_texts = []
+        processed_metadata = []
+        
+        # Add "Code for" prefix for Global Scope
+        global_scope_code = "// Code for Global Scope\n" + others_text
 
+        # Apply text splitter if provided
+        if text_splitter:
+            # Initialize the splitter based on whether it's a class or instance
+            if isinstance(text_splitter, type):
+                splitter = text_splitter.from_language(language=langchain_text_splitters.Language.JS)
+            else:
+                splitter = text_splitter
+                
+            # Split the text and process chunks
+            others_chunks = splitter.split_text(global_scope_code)
+            for i, chunk in enumerate(others_chunks, 1):
+                # For split chunks, add chunk number to distinguish them
+                chunk_prefix = f"// Code for Global Scope (Part {i})\n"
+                if not chunk.startswith("// Code for"):  # Avoid double prefix
+                    chunk = chunk_prefix + chunk
+                processed_metadata.append(others_metadata.copy())
+                processed_texts.append(chunk)
+        else:
+            processed_metadata.append(others_metadata)
+            processed_texts.append(global_scope_code)
+            
+        return processed_texts, processed_metadata

@@ -93,6 +93,11 @@ class JavascriptASTDocumentLoader(BaseLoader):
 
     def __process_node(self, node: Node, parent_name: str, parent_type: str) -> Optional[Dict]:
          """Process a node based on its type and return metadata."""
+
+         # Skip root node from being processed
+         if JS_MAPPING[node.type] == "root":
+            return None
+
          if node.type in ["function_declaration", "function_expression"]:
              return self.__extract_function_details(node, parent_name, parent_type)
          elif node.type == "arrow_function":
@@ -417,17 +422,23 @@ class JavascriptASTDocumentLoader(BaseLoader):
         if not nodes_metadata:
             return [], []
 
-        all_nodes = []
-        all_nodes_text = []
+        all_nodes: List[Dict] = []
+        all_nodes_text: List[str] = []
         
-        # Create a list of all block ranges to identify "others" content
-        block_ranges = []
-        for node in nodes_metadata:
-            block_ranges.append((node["start_offset"], node["end_offset"]))
-        
-        # Sort ranges to make it easier to iterate
-        block_ranges.sort()
-        # TODO: Add processing for others blocks in Global Scope
+        others_combined: List[str] = []
+        others_metadata = {
+            "relative_path": self.file_path,
+            "start_offset": nodes_metadata[0]["start_offset"],
+            "end_offset": nodes_metadata[-1]["end_offset"],
+            "block_type": "others",
+            "block_name": "Global Scope",
+            "block_args": [],
+            "parent_type": "root",
+            "parent_name": "root",
+            "functions_called": [],
+            "docstrings": [],
+            "comments": []
+        }
 
         # Process blocks (functions, classes, methods)
         for node_data in nodes_metadata:
@@ -435,12 +446,14 @@ class JavascriptASTDocumentLoader(BaseLoader):
                 # For classes, we want to replace method implementations with summaries
                 class_text = source_code[node_data["start_offset"]:node_data["end_offset"]].decode()
                 methods = node_data.get("methods", [])
+                others_combined.append(self.__generate_code_for_block(node_data))
                 
                 # Replace each method implementation with a summary line
                 for method in methods:
                     method_text = source_code[method["start_offset"]:method["end_offset"]].decode()
-                    method_summary = f"// Code for {method['block_type']}: {method['parent_name']}.{method['block_name']}({', '.join(method['block_args'])})\n"
+                    method_summary = self.__generate_code_for_block(node_data) 
                     class_text = class_text.replace(method_text, method_summary)
+                    others_combined.append(method_summary)
                 
                 all_nodes.append(node_data)
                 all_nodes_text.append(class_text)
@@ -450,17 +463,35 @@ class JavascriptASTDocumentLoader(BaseLoader):
                     method_text = source_code[method["start_offset"]:method["end_offset"]].decode()
                     all_nodes.append(method)
                     all_nodes_text.append(method_text)
-            else:
-                # Handle other blocks
+
+            elif node_data["block_type"] == "function":
                 node_text = source_code[node_data["start_offset"]:node_data["end_offset"]].decode()
+                others_combined.append(self.__generate_code_for_block(node_data))
                 all_nodes.append(node_data)
                 all_nodes_text.append(node_text)
+
+            else:  # Others
+                others_combined.append(source_code[node_data["start_offset"]:node_data["end_offset"]].decode())
+                self.__merge_others_metadata(others_metadata, node_data)
+
+        others_combined_text = "\n".join(others_combined)
+        others_combined_text, others_metadata = self.__process_global_scope(others_combined_text, others_metadata, text_splitter)
+
+        all_nodes.extend(others_metadata)
+        all_nodes_text.extend(others_combined_text)
 
         # Sort nodes by start_offset to maintain original code order
         sorted_nodes = sorted(zip(all_nodes_text, all_nodes), key=lambda x: x[1]["start_offset"])
         all_nodes_text, all_nodes = zip(*sorted_nodes)
 
         return list(all_nodes_text), list(all_nodes)
+
+    def __merge_others_metadata(self, others_metadata: Dict, node_data: Dict) -> None:
+        """
+        Append functions_called, docstrings, and comments from the "others" node data into the given metadata.
+        """
+        for key in ["functions_called", "comments"]:
+            others_metadata[key] += node_data.get(key, [])
 
     def __process_global_scope(
         self,
@@ -500,3 +531,14 @@ class JavascriptASTDocumentLoader(BaseLoader):
             processed_texts.append(global_scope_code)
             
         return processed_texts, processed_metadata
+
+    def __generate_code_for_block(self, node_data: Dict) -> str:
+        """
+        Generate "Code for: " statements for blocks of type function/class.
+        """
+        args = ", ".join(node_data["block_args"])
+
+        if node_data["parent_type"] == "class":  # Class method
+            return f"// Code for {node_data['block_type']}: {node_data['parent_name']}.{node_data['block_name']}({args})\n"
+        else:  # Normal function/class
+            return f"// Code for {node_data['block_type']}: {node_data['block_name']}({args})\n"

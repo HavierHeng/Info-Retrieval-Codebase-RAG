@@ -68,8 +68,8 @@ def main():
     try:
         documents = load_documents(args.directory, args.file_type, loader_choice)
         print(f"Loaded {len(documents)} documents from {args.directory} (file type: {args.file_type})")
-        for i, document in enumerate(documents):
-            if document.metadata.get("block_type") != "others":
+        for i, document in enumerate(documents, 1):
+            if document.metadata.get("block_type") == "others":
                 print(f"---------Doc Meta {i}----------")
                 pprint(document.metadata)
                 print(f"*---------Page Content {i}----------*")
