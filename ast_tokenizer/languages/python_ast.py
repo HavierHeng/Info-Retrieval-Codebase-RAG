@@ -330,6 +330,9 @@ class PythonASTDocumentLoader(BaseLoader):
         # Sort nodes by their start offset if not already sorted
         nodes_metadata.sort(key=lambda x: x.get("start_offset", 0))
 
+        # Gather all function/class nodes code blocks as bytes - this is to setup to inject in "Code for: " statements
+        all_nodes_text = [] 
+
         for node_data in nodes_metadata:
             match node_data["block_type"]:
                 case "others":  # Merge code
@@ -350,13 +353,24 @@ class PythonASTDocumentLoader(BaseLoader):
                     if node_methods:
                         node_data["end_offset"] = node_methods[0]["start_offset"]
 
-                    all_nodes.append(node_data)
+                    # Add node text
+                    node_text = [source_code[node_data["start_offset"]: node_data["end_offset"]]]
 
                     # All method separately as its own entry
                     for node_method in node_methods: 
-                        args = ", ".join(node_method["block_args"])
+                        # Add node methods as their own standalone entry
                         all_nodes.append(node_method)
+                        all_nodes_text.append(source_code[node_method["start_offset"]: node_method["end_offset"]])
+
+                        args = ", ".join(node_method["block_args"])
+                        # For adding to classes
+                        node_text.append(f"# Code for {node_method['block_type']}: {node_data['block_name']}.{node_method['block_name']}({args})\n".encode())
+
+                        # For adding to combined others block
                         others.append(f"# Code for {node_method['block_type']}: {node_data['block_name']}.{node_method['block_name']}({args})\n".encode())
+
+                    all_nodes.append(node_data)
+                    all_nodes_text.append(b"".join(node_text).decode())
 
 
         # Merge all code blocks into one document
@@ -378,9 +392,6 @@ class PythonASTDocumentLoader(BaseLoader):
             others_doc_text = [others_doc_text]
             others_metadata = [others_metadata]
 
-        # Get all function/class nodes code blocks as string
-        all_nodes_text = [source_code[node_data["start_offset"]: node_data["end_offset"]].decode() for node_data in all_nodes]
-        
         all_nodes.extend(others_metadata)
         all_nodes_text.extend(others_doc_text)
 
