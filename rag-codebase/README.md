@@ -67,6 +67,11 @@ TODO: This one is quite compute heavy, depends if we really need it
 ### Adding references to the output of the chatbot
 
 
+### Query Rewriting with HyDE
+
+Hypothetical document reranking works on the idea that searching on raw questions may not work well because their embeddings may not be very similar to those of the relevant documents. Instead it might help to have the model generate a hypothetical relevant document, and then use that to perform similarity search.
+
+This could help deal with generic questions that a pure IR system might not handle as well - for example "Summarize the codebase" where there are little keywords for the similarity search to occur effectively.
 
 ## Setup
 ### Pre-requisites
