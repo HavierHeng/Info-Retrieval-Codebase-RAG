@@ -20,7 +20,8 @@ blank_convo = {"repo": None,
                "processed": False,  # Has repo been cloned and indexed?
                "sidebar_details": False,  # Show sidebar details?
                "messages": [],  # Messages are for display
-               "active_messages": []  # Active Messages is passed as context to LLM 
+               "active_messages": [],  # Active Messages is passed as context to LLM 
+               "repo_database": None  # RAG database for querying
                }
 
 def get_active_convo() -> int:
@@ -92,10 +93,13 @@ def process_local_repository():
     with st.chat_message("assistant"):
         repo_path = st.session_state.global_messages[get_active_convo()].get("repo")
         repo_name = st.session_state.global_messages[get_active_convo()].get("repo_display_name")
+        rag_db = st.session_state.global_messages[get_active_convo()].get("repo_database")
         st.session_state.global_messages[get_active_convo()]["repo_path"] = repo_path
 
         with st.spinner(text="Indexing local repository..."):
-            indexed = rag.index_repo()
+            if rag_db is None:
+                st.session_state.global_messages[get_active_convo()]["repo_database"] = rag.RAG_Database(repo_path)
+            indexed = rag_db.index_repo()
             st.toast(f"Repository {repo_name} at {repo_path} indexed.")
 
         if indexed: 
@@ -117,6 +121,7 @@ def process_remote_repository():
     with st.chat_message("assistant"):
         repo_url = st.session_state.global_messages[get_active_convo()].get("repo")
         repo_name = st.session_state.global_messages[get_active_convo()].get("repo_display_name")
+        rag_db = st.session_state.global_messages[get_active_convo()].get("repo_database")
         with st.spinner(text="Cloning Repository..."):
             # ui.display_clone_progress()
             cloned = git_helper.clone_repo(repo_url)
@@ -125,7 +130,10 @@ def process_remote_repository():
                 st.session_state.global_messages[get_active_convo()]["repo_path"] = cloned
 
         with st.spinner(text="Indexing repository..."):
-            indexed = rag.index_repo()
+            repo_path = st.session_state.global_messages[get_active_convo()].get("repo_path")
+            if rag_db is None:
+                st.session_state.global_messages[get_active_convo()]["repo_database"] = rag.RAG_Database(repo_path)
+            indexed = rag_db.index_repo()
             st.toast(f"Repository {repo_name} indexed.")
 
         if cloned and indexed: 
@@ -162,6 +170,7 @@ def continue_code_convo():
     """
     curr_convo = get_active_convo()
     active_messages = st.session_state.global_messages[curr_convo]["active_messages"]
+    rag_db = st.session_state.global_messages[curr_convo]["repo_database"]
 
     repo_convo = ui.get_user_chat_input()
 
@@ -169,8 +178,7 @@ def continue_code_convo():
         add_msgs_to_convo(curr_convo, [repo_convo])
         st.chat_message("user").write_stream(prints.fake_print_stream(repo_convo["content"]))
         with st.spinner("Thinking..."):
-            # TODO: This is by right the whole conversation + context from RAG - there is more processing than retrieval alone
-            query_result = rag.query_rag(repo_convo["content"])
+            query_result = rag_db.query_rag(repo_convo["content"])
             st.chat_message("assistant").write_stream(prints.fake_print_stream(query_result))  # Fix the rendering bug since it doesn't refresh right away
             add_msgs_to_convo(curr_convo, [{"role": "assistant", 
                                             "content": f"{query_result}"}])
