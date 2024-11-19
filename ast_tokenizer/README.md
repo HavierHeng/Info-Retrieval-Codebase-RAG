@@ -95,6 +95,7 @@ The tokenizer can be run in two modes:
 
 ## TODOs
 - [ ] Package as a library
+- [ ] Javascript parser doesn't capture global context
 - [ ] LLM metadata using local llm function calling
 
 ## Acknowledgements

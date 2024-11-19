@@ -371,7 +371,7 @@ class JavascriptASTDocumentLoader(BaseLoader):
 
         Code blocks if containing some other block have a stand in "// Code for ..." format:
         - Classes: "// Code for class: name(params)"
-        - Methods: "// Code for class.method(params)"
+        - Methods: "// Code for method: class.method(params)"
         - Functions: "// Code for function: name(params)"
 
         The metadata is returned in the order of appearance in the code.
@@ -392,28 +392,6 @@ class JavascriptASTDocumentLoader(BaseLoader):
         
         # Sort ranges to make it easier to iterate
         block_ranges.sort()
-        
-       
-        # TODO: Get and combine "others" content 
-        # others_text = b"\n".join(self.others_content).decode()
-        # if others_text.strip():
-        #    others_metadata = {
-        #        "relative_path": self.file_path,
-        #        "start_offset": 0,
-        #        "end_offset": len(source_code),
-        #        "block_type": "others",
-        #        "block_name": "Global Scope",
-        #        "block_args": [],
-        #        "parent_type": "root",
-        #        "parent_name": "",
-        #        "functions_called": [],
-        #        "comments": self.__extract_comments(JS_PARSER.parse(source_code).root_node)
-        #        }
-
-        #    # Apply text splitter if provided, and put a global label
-        #    global_texts, global_metadata = self.__process_global_scope(others_text, others_metadata, text_splitter)
-        #    all_nodes.extend(global_metadata)
-        #    all_nodes_text.extend(global_texts)
 
         # Process blocks (functions, classes, methods)
         for node_data in nodes_metadata:
@@ -425,7 +403,7 @@ class JavascriptASTDocumentLoader(BaseLoader):
                 # Replace each method implementation with a summary line
                 for method in methods:
                     method_text = source_code[method["start_offset"]:method["end_offset"]].decode()
-                    method_summary = f"# Code for {method['block_type']}: {method['parent_name']}.{method['block_name']}({', '.join(method['block_args'])})\n"
+                    method_summary = f"// Code for {method['block_type']}: {method['parent_name']}.{method['block_name']}({', '.join(method['block_args'])})\n"
                     class_text = class_text.replace(method_text, method_summary)
                 
                 all_nodes.append(node_data)
