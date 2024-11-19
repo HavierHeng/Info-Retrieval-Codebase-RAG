@@ -77,10 +77,11 @@ You should have Python 3 installed before using this tokenizer. Verify this with
 - `python3 --version`
 
 The project is set up in a virtualenv (`venv`)
-1) Activate the virtualenv: 
+1) Create venv: `python -m venv .venv`
+2) Activate the virtualenv: 
     - Windows: `.venv/bin/activate` or `ast-tokenizer/bin/activate.ps1` if in powershell
     - Linux/MacOS (based on shell): `source .venv/bin/activate.sh`
-2) Check that environment is activated - terminal prompt should show something like
+3) Check that environment is activated - terminal prompt should show something like
 ```
 (.venv) $
 ```

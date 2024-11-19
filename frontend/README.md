@@ -6,6 +6,10 @@ The frontend provides a simple chatbot interface to the RAG system to query abou
 
 ## Setup
 
+## Hardware requirement
+
+Nvidia GPU only... CUDA doesn't work otherwise. 
+
 ## Pre-Requisites 
 
 You should have Python 3 installed before using this tokenizer. Verify this with either:
@@ -13,14 +17,14 @@ You should have Python 3 installed before using this tokenizer. Verify this with
 - `python3 --version`
 
 The project is set up in a virtualenv (`venv`)
-1) Activate the virtualenv: 
-    - Windows: `frontend/bin/activate` or `frontend/bin/activate.ps1` if in powershell
-    - Linux/MacOS (based on shell): `source frontend/bin/activate.sh`
-2) Check that environment is activated - terminal prompt should show something like
+1) Create venv: `python -m venv .venv`
+2) Activate the virtualenv: 
+    - Windows: `.venv/bin/activate` or `ast-tokenizer/bin/activate.ps1` if in powershell
+    - Linux/MacOS (based on shell): `source .venv/bin/activate.sh`
+3) Check that environment is activated - terminal prompt should show something like
 ```
-(frontend) $
+(.venv) $
 ```
 3) Install dependencies - `pip install -r requirements.txt`
-
 ## Execution
 Run Streamlit with: `streamlit run chatbot.py`
