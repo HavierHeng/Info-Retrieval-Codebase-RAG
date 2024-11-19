@@ -8,11 +8,15 @@ from langchain_community.document_loaders.generic import GenericLoader
 from langchain_community.document_loaders.parsers import LanguageParser
 from functools import partial
 
-LANGUAGE_LOADERS  = {
-    "py": [PythonLoader,  # Default Loader - Reads Python files as is, without splitting 
-           partial(GenericLoader.from_filesystem, glob="*", suffixes=[".py"], parser=LanguageParser()),
-           PythonASTDocumentLoader],  # Custom Loader - Based on PythonSegmenter + Custom Treesitter
-    "js": [partial(GenericLoader.from_filesystem, glob="*", suffixes=[".js"], parser=LanguageParser())]  # Default JS Loader
+LANGUAGE_LOADERS = {
+    "py": [
+        {"name": "Python Loader", "loader": PythonLoader},
+        {"name": "Generic Python Loader", "loader": partial(GenericLoader.from_filesystem, glob="*", suffixes=[".py"], parser=LanguageParser())},
+        {"name": "Python AST Document Loader", "loader": PythonASTDocumentLoader}
+    ],
+    "js": [
+        {"name": "Generic JS Loader", "loader": partial(GenericLoader.from_filesystem, glob="*", suffixes=[".js"], parser=LanguageParser())}
+    ]
 }
 
 def load_documents(directory, file_type, loader_choice):
@@ -30,7 +34,7 @@ def load_documents(directory, file_type, loader_choice):
         raise ValueError(f"Invalid loader choice. Please choose a number between 0 and {len(loaders) - 1}.")
     
     # Get the selected loader class
-    selected_loader_class = loaders[loader_choice]
+    selected_loader_class = loaders[loader_choice]["loader"]
 
     # Set up the DirectoryLoader with the selected loader
     loader = DirectoryLoader(directory, glob=f"*.{file_type}", loader_cls=selected_loader_class)
@@ -52,8 +56,8 @@ def main():
     available_loaders = LANGUAGE_LOADERS[args.file_type]
     print(f"Available loaders for {args.file_type} files:")
     
-    for idx, loader in enumerate(available_loaders):
-        print(f"{idx}. {loader}")  # Display the loader class name
+    for idx, loader_info in enumerate(available_loaders):
+        print(f"{idx}. {loader_info['name']}")  # Display the human-readable name
 
     # Ask the user to choose a loader
     loader_choice = int(input("Please select a loader by number: "))
@@ -72,4 +76,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
