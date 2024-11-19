@@ -10,7 +10,7 @@ import langchain_text_splitters
 PY_LANGUAGE = Language(tspython.language())
 PY_PARSER = Parser(PY_LANGUAGE)
 
-py_mapping = {
+PY_MAPPING = {
     "function_definition": "function",
     "class_definition": "class",
     "module": "root"
@@ -48,7 +48,7 @@ class PythonASTDocumentLoader(BaseLoader):
             Process a node based on its type and return its metadata.
             """
             # Skip root node from being processed
-            if py_mapping[node.type] == "root":
+            if PY_MAPPING[node.type] == "root":
                 return None
 
             node_metadata = None
@@ -70,12 +70,12 @@ class PythonASTDocumentLoader(BaseLoader):
             for child in node.children:
                 if child.type in ["function_definition", "class_definition"]:
                     # Recurse on functions and classes
-                    result.extend(self.__extract_nodes(child, source_code, parent_type=py_mapping[node.type], parent_name=curr_name))
+                    result.extend(self.__extract_nodes(child, source_code, parent_type=PY_MAPPING[node.type], parent_name=curr_name))
                 else:
                     # Non functions and classes only get metadata extracted
                     if node.type not in ["function_definition", "class_definition"]:
                         # Safety check if current node is not a function or class
-                        result.append(self.__extract_other_details(child, parent_type=py_mapping[node.type], parent_name=curr_name))
+                        result.append(self.__extract_other_details(child, parent_type=PY_MAPPING[node.type], parent_name=curr_name))
             return result
 
         # Start processing the current node and add to result
@@ -258,7 +258,7 @@ class PythonASTDocumentLoader(BaseLoader):
         if node_body:
             for child in node_body.children:
                 if child.type == "function_definition":
-                    methods.append(self.__extract_function_details(child, parent_class_name, py_mapping[node.type]))
+                    methods.append(self.__extract_function_details(child, parent_class_name, PY_MAPPING[node.type]))
         return methods
 
     def __extract_class_args(self, methods: List[Dict]) -> List[str]:

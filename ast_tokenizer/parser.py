@@ -1,6 +1,7 @@
 import argparse
 from langchain_community.document_loaders import PythonLoader, DirectoryLoader
 from languages.python_ast import PythonASTDocumentLoader
+from languages.javascript_ast import JavascriptASTDocumentLoader
 from pprint import pprint
 import warnings
 warnings.filterwarnings("ignore")
@@ -12,10 +13,11 @@ LANGUAGE_LOADERS = {
     "py": [
         {"name": "Python Loader", "loader": PythonLoader},
         {"name": "Generic Python Loader", "loader": partial(GenericLoader.from_filesystem, glob="*", suffixes=[".py"], parser=LanguageParser())},
-        {"name": "Python AST Document Loader", "loader": PythonASTDocumentLoader}
+        {"name": "(Custom) Python AST Document Loader", "loader": PythonASTDocumentLoader}
     ],
     "js": [
-        {"name": "Generic JS Loader", "loader": partial(GenericLoader.from_filesystem, glob="*", suffixes=[".js"], parser=LanguageParser())}
+        {"name": "Generic JS Loader", "loader": partial(GenericLoader.from_filesystem, glob="*", suffixes=[".js"], parser=LanguageParser())},
+        {"name": "(Custom) Javascript AST Document Loader", "loader": JavascriptASTDocumentLoader} 
     ]
 }
 
