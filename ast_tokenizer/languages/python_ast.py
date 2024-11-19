@@ -305,6 +305,8 @@ class PythonASTDocumentLoader(BaseLoader):
         If a RecursiveCharacterTextSplitter is provided, it will be used to split the huge "others" block.
 
         All other classes/function blocks are kept in order.
+
+        PS: This class is pretty much the messy part of the code - its just formatting.
         """
         if len(nodes_metadata) == 0:
             return [], []
@@ -341,11 +343,21 @@ class PythonASTDocumentLoader(BaseLoader):
                     others.append(f"# Code for {node_data['block_type']}: {node_data['block_name']}({args})\n".encode())
                 case "class":
                     args = ", ".join(node_data["block_args"])
-                    all_nodes.append(node_data)
                     others.append(f"# Code for {node_data['block_type']}: {node_data['block_name']}({args})\n".encode())
-                    for node_method in node_data["methods"]: 
+
+                    # Set the end point of class as the start point of the first method if any
+                    node_methods = node_data.get("methods", None)
+                    if node_methods:
+                        node_data["end_offset"] = node_methods[0]["start_offset"]
+
+                    all_nodes.append(node_data)
+
+                    # All method separately as its own entry
+                    for node_method in node_methods: 
                         args = ", ".join(node_method["block_args"])
+                        all_nodes.append(node_method)
                         others.append(f"# Code for {node_method['block_type']}: {node_data['block_name']}.{node_method['block_name']}({args})\n".encode())
+
 
         # Merge all code blocks into one document
         others_doc = b"".join(others)
@@ -371,5 +383,8 @@ class PythonASTDocumentLoader(BaseLoader):
         
         all_nodes.extend(others_metadata)
         all_nodes_text.extend(others_doc_text)
+
+        sorted_nodes = sorted(zip(all_nodes_text, all_nodes), key=lambda x: x[1]["start_offset"])
+        all_nodes_text, all_nodes = zip(*sorted_nodes)
 
         return all_nodes_text, all_nodes
