@@ -42,10 +42,10 @@ class PythonASTDocumentLoader(BaseLoader):
             code_file_bytes = f.read()
             tree = PY_PARSER.parse(code_file_bytes)
             all_nodes_metadata = self.__extract_nodes(tree.root_node, code_file_bytes, "root", "")
-            all_nodes_text = [code_file_bytes[node["start_offset"]:node["end_offset"]].decode() for node in all_nodes_metadata]
-            combined_others_text, combined_others_metadata = self.__merge_others_metadata(all_nodes_metadata, code_file_bytes)  
-            all_nodes_text.extend(combined_others_text)
-            all_nodes_metadata.extend(combined_others_metadata)
+            # all_nodes_text = [code_file_bytes[node["start_offset"]:node["end_offset"]].decode() for node in all_nodes_metadata]
+            all_nodes_text, all_nodes_metadata = self.__simplify_metadata(all_nodes_metadata, code_file_bytes)  
+            # all_nodes_text.extend(combined_others_text)
+            # all_nodes_metadata.extend(combined_others_metadata)
 
             # TODO: Generate remaining metadata for each block using LLM - Pydantic
 
@@ -289,7 +289,7 @@ class PythonASTDocumentLoader(BaseLoader):
 
         return result
 
-    def __merge_others_metadata(
+    def __simplify_metadata(
         self,
         nodes_metadata: List[Dict],
         source_code: bytes,
@@ -303,10 +303,13 @@ class PythonASTDocumentLoader(BaseLoader):
         Any parts of the code where classes and functions were are replaced with "Code for: <func/class info>"
         
         If a RecursiveCharacterTextSplitter is provided, it will be used to split the huge "others" block.
+
+        All other classes/function blocks are kept in order.
         """
         if len(nodes_metadata) == 0:
             return [], []
 
+        all_nodes = []
         others = []
         others_metadata = {
             "relative_path": self.file_path,
@@ -326,18 +329,19 @@ class PythonASTDocumentLoader(BaseLoader):
         nodes_metadata.sort(key=lambda x: x.get("start_offset", 0))
 
         for node_data in nodes_metadata:
-            # Append all functions and comments - so as to save on processing
-            for key in ["functions_called", "docstrings", "comments"]:
-                others_metadata[key] = others_metadata.get(key, []) + node_data.get(key, [])
-
             match node_data["block_type"]:
                 case "others":  # Merge code
+                    # Append all functions and comments - so as to save on processing
+                    for key in ["functions_called", "docstrings", "comments"]:
+                        others_metadata[key] = others_metadata.get(key, []) + node_data.get(key, [])
                     others.append(source_code[node_data["start_offset"]: node_data["end_offset"]] + b'\n')
                 case "function":
                     args = ", ".join(node_data["block_args"])
+                    all_nodes.append(node_data)
                     others.append(f"# Code for {node_data['block_type']}: {node_data['block_name']}({args})\n".encode())
                 case "class":
                     args = ", ".join(node_data["block_args"])
+                    all_nodes.append(node_data)
                     others.append(f"# Code for {node_data['block_type']}: {node_data['block_name']}({args})\n".encode())
                     for node_method in node_data["methods"]: 
                         args = ", ".join(node_method["block_args"])
@@ -362,4 +366,10 @@ class PythonASTDocumentLoader(BaseLoader):
             others_doc_text = [others_doc_text]
             others_metadata = [others_metadata]
 
-        return others_doc_text, others_metadata
+        # Get all function/class nodes code blocks as string
+        all_nodes_text = [source_code[node_data["start_offset"]: node_data["end_offset"]].decode() for node_data in all_nodes]
+        
+        all_nodes.extend(others_metadata)
+        all_nodes_text.extend(others_doc_text)
+
+        return all_nodes_text, all_nodes
