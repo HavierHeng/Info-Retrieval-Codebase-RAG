@@ -5,6 +5,6 @@
 
 
 ## More information
-- [Tokenizer](ast-tokenizer/README.md)
+- [Tokenizer](ast_tokenizer/README.md)
 - [RAG System](rag-codebase/README.md)
 - [Frontend Implementation](frontend/README.md)
