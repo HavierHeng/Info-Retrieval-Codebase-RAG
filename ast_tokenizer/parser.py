@@ -69,11 +69,10 @@ def main():
         documents = load_documents(args.directory, args.file_type, loader_choice)
         print(f"Loaded {len(documents)} documents from {args.directory} (file type: {args.file_type})")
         for i, document in enumerate(documents, 1):
-            if document.metadata.get("block_type") == "others":
-                print(f"---------Doc Meta {i}----------")
-                pprint(document.metadata)
-                print(f"*---------Page Content {i}----------*")
-                print(document.page_content)
+            print(f"---------Doc Meta {i}----------")
+            pprint(document.metadata)
+            print(f"*---------Page Content {i}----------*")
+            print(document.page_content)
     except Exception as e:
         print(f"Error: {e}")
 
