@@ -99,6 +99,7 @@ def process_local_repository():
         with st.spinner(text="Indexing local repository..."):
             if rag_db is None:
                 st.session_state.global_messages[get_active_convo()]["repo_database"] = rag.RAG_Database(repo_path)
+            rag_db = st.session_state.global_messages[get_active_convo()].get("repo_database")
             indexed = rag_db.index_repo()
             st.toast(f"Repository {repo_name} at {repo_path} indexed.")
 
@@ -133,6 +134,7 @@ def process_remote_repository():
             repo_path = st.session_state.global_messages[get_active_convo()].get("repo_path")
             if rag_db is None:
                 st.session_state.global_messages[get_active_convo()]["repo_database"] = rag.RAG_Database(repo_path)
+            rag_db = st.session_state.global_messages[get_active_convo()].get("repo_database")
             indexed = rag_db.index_repo()
             st.toast(f"Repository {repo_name} indexed.")
 

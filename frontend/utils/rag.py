@@ -30,19 +30,25 @@ RAG_CONTEXT_PROMPT = "For the user query, here are some relevant information abo
 class RAG_Database:
     def __init__(self, repo_path, embeddings = DEFAULT_EMBEDDING):
         self.repo_path = repo_path
-        loader = DirectoryLoader(repo_path, glob="*.py", loader_cls=PythonLoader, recursive=True)
+        loader = DirectoryLoader(repo_path, glob="*.py", loader_cls=PythonLoader, recursive=True)  # TODO: Hardcoded to Python only for now
         self.documents = loader.load()
         self.embeddings = embeddings
         self.llm = OLLAMA_LLM_MODEL
         
-    def index_repo(self):
-        self.db = FAISS.from_documents(self.documents, self.embeddings)
-        retriever = self.db.as_retriever(search_kwargs={'k': 5})
-        prompt = PromptTemplate(
-            template=RAG_TEMPLATE,
-            input_variables=['context', 'input'])
-        combine_docs_chain = create_stuff_documents_chain(self.llm, prompt)
-        self.qa_llm = create_retrieval_chain(retriever, combine_docs_chain)
+    def index_repo(self) -> bool:
+        """
+        Indexes repo - will return False if not successful
+        """
+        if self.documents:
+            self.db = FAISS.from_documents(self.documents, self.embeddings)
+            retriever = self.db.as_retriever(search_kwargs={'k': 5})
+            prompt = PromptTemplate(
+                template=RAG_TEMPLATE,
+                input_variables=['context', 'input'])
+            combine_docs_chain = create_stuff_documents_chain(self.llm, prompt)
+            self.qa_llm = create_retrieval_chain(retriever, combine_docs_chain)
+            return True
+        return False
 
     def query_rag(self, query):
         output = self.qa_llm.invoke({"input": query})
