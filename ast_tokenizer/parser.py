@@ -7,16 +7,17 @@ import warnings
 warnings.filterwarnings("ignore")
 from langchain_community.document_loaders.generic import GenericLoader
 from langchain_community.document_loaders.parsers import LanguageParser
+from langchain_text_splitters import Language
 from functools import partial
 
 LANGUAGE_LOADERS = {
     "py": [
         {"name": "Python Loader", "loader": PythonLoader},
-        {"name": "Generic Python Loader", "loader": partial(GenericLoader.from_filesystem, glob="*", suffixes=[".py"], parser=LanguageParser())},
+        {"name": "Generic Python Loader", "loader": partial(GenericLoader.from_filesystem, glob="*", suffixes=[".py"], parser=LanguageParser(language=Language.PYTHON))},
         {"name": "(Custom) Python AST Document Loader", "loader": PythonASTDocumentLoader}
     ],
     "js": [
-        {"name": "Generic JS Loader", "loader": partial(GenericLoader.from_filesystem, glob="*", suffixes=[".js"], parser=LanguageParser())},
+        {"name": "Generic JS Loader", "loader": partial(GenericLoader.from_filesystem, glob="*", suffixes=[".js"], parser=LanguageParser(language=Language.JS))},
         {"name": "(Custom) Javascript AST Document Loader", "loader": JavascriptASTDocumentLoader} 
     ]
 }
