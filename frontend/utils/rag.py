@@ -23,6 +23,7 @@ RAG_TEMPLATE = """Use the following context to answer the user's question.
     Context: {context}
     Question: {input}
     """
+OLLAMA_LLM_MODEL = OllamaLLM(model="llama3.1:8b", num_predict=-1, temperature=0.1)
 RAG_SYSTEM_PROMPT = "You are a programmer working on this codebase. You are to help the user understand the code base as much as possible"
 RAG_CONTEXT_PROMPT = "For the user query, here are some relevant information about the code that will help you."
 
@@ -32,7 +33,7 @@ class RAG_Database:
         loader = DirectoryLoader(repo_path, glob="*.py", loader_cls=PythonLoader, recursive=True)
         self.documents = loader.load()
         self.embeddings = embeddings
-        self.llm = OllamaLLM(model="llama3.1:8b", num_predict=-1, temperature=0.1)
+        self.llm = OLLAMA_LLM_MODEL
         
     def index_repo(self):
         self.db = FAISS.from_documents(self.documents, self.embeddings)
