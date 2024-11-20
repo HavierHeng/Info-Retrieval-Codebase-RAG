@@ -157,7 +157,7 @@ def start_code_convo(curr_convo):
                           "content": f"Hello! I see you are interested in {st.session_state.global_messages[curr_convo]['repo_display_name']}. How may I help you?"}
     starting_code_convo = [
         {"role": "system", 
-         "content": rag.RAG_SYSTEM_PROMPT.format()},
+         "content": rag.RAG_Database.RAG_SYSTEM_PROMPT.format()},
         assistant_init_msg
     ]
     # Only display assistant, the system prompt is invisible

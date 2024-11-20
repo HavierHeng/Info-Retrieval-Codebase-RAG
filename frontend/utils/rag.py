@@ -10,7 +10,6 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(os.path.abspath('')), './ast_tokenizer/languages')))
-print(sys.path)
 from python_ast import PythonASTDocumentLoader
 from javascript_ast import JavascriptASTDocumentLoader
 
@@ -32,7 +31,7 @@ class RAG_Database:
         self.documents = py_loader.load() + js_loader.load()
         self.embeddings = embeddings
         
-    def full_index_repo(self):
+    def index_repo(self):
         self.db = FAISS.from_documents(self.documents, self.embeddings)
         retriever = self.db.as_retriever(search_kwargs={'k': 5})
         prompt = PromptTemplate(
@@ -41,7 +40,7 @@ class RAG_Database:
         combine_docs_chain = create_stuff_documents_chain(RAG_Database.OLLAMA_LLM_MODEL, prompt)
         self.qa_llm = create_retrieval_chain(retriever, combine_docs_chain)
 
-    def full_query_rag(self, query):
+    def query_rag(self, query):
         output = self.qa_llm.invoke({"input": query})
         return output["answer"]
 

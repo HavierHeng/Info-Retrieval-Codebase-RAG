@@ -57,20 +57,21 @@ def render_sidebar():
                             # if button pressed for this idx
                             repo_details = ["**Detailed Information:**  "]
                             
-                            if is_remote:
-                                repo_details.extend([f":gray[Owner: {repo_owner}]  ", 
-                                                     f":gray[Location: {repo_location}]  ", 
-                                                     f":gray[Local/Remote: {'Remote' if is_remote else 'Local'}]  ",
-                                                     f":gray[Active Branch: {repo_branch}]  ", 
-                                                     f":gray[Commit Hash: {repo_commit_sha}]  ", 
-                                                     f":gray[Local Path: {repo_path}]  ", 
-                                                     f":gray[Date: {repo_pull_date.strftime('%d %b %Y %X')}]  "])
-                            elif not is_remote:
-                                repo_details.extend([ f":gray[Location: {repo_location}]  ", 
-                                                     f":gray[Local/Remote: {'Remote' if is_remote else 'Local'}]  ",
-                                                     f":gray[Active Branch: {repo_branch}]  ", 
-                                                     f":gray[Commit Hash: {repo_commit_sha}]  ", 
-                                                     f":gray[Date: {repo_pull_date.strftime('%d %b %Y %X')}]  "])
+                            if all([repo_location, repo_branch, repo_commit_sha, repo_pull_date]):
+                                if is_remote:
+                                        repo_details.extend([f":gray[Owner: {repo_owner}]  ", 
+                                                             f":gray[Location: {repo_location}]  ", 
+                                                             f":gray[Local/Remote: {'Remote' if is_remote else 'Local'}]  ",
+                                                             f":gray[Active Branch: {repo_branch}]  ", 
+                                                             f":gray[Commit Hash: {repo_commit_sha}]  ", 
+                                                             f":gray[Local Path: {repo_path}]  ", 
+                                                             f":gray[Date: {repo_pull_date.strftime('%d %b %Y %X')}]  "])
+                                elif not is_remote:
+                                    repo_details.extend([ f":gray[Location: {repo_location}]  ", 
+                                                         f":gray[Local/Remote: {'Remote' if is_remote else 'Local'}]  ",
+                                                         f":gray[Active Branch: {repo_branch}]  ", 
+                                                         f":gray[Commit Hash: {repo_commit_sha}]  ", 
+                                                         f":gray[Date: {repo_pull_date.strftime('%d %b %Y %X')}]  "])
                             else:
                                 repo_details.append(":gray[No details available...]  ")
 
@@ -217,10 +218,6 @@ def ask_for_repo_details():
                     # Default repo name to repo name inferred from URL if not provided
                     if not repo_name.strip():
                         _, repo_name = git_helper.get_repo_owner_name_from_url(repo_url)
-
-                    # Reset on success
-                    # st.session_state.repo_name = ""
-                    # st.session_state.repo_url = ""
                     return repo_url, repo_name
                 else:
                     # Provide a clear message to the user if repo_url is empty or invalid
@@ -235,11 +232,6 @@ def ask_for_repo_details():
                     # Default repo name to repo root dir if not provided
                     if not repo_name.strip():
                         repo_name = git_helper.get_local_repo_root_dir(repo_path)
-
-                    # Reset on success
-                    # TODO: Fix 
-                    # st.session_state.repo_name = ""
-                    # st.session_state.repo_path = ""
                     return repo_path, repo_name
                 else:
                     # Provide a clear message to the user if repo_path is empty or invalid
