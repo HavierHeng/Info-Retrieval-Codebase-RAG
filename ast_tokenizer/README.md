@@ -68,24 +68,19 @@ These solutions are close but not enough. Python Segmenter and Generic Loader is
 
 A custom DocumentLoader based on Treesitter and PythonSegmenter's design that returns Langchain `Document` files is made. This serves as an experimentation platform for how much metadata is needed for retrieval.
 
-## Setup
+# Setup
+## Prerequisites
+Follow the instructions in the root of the project repo. 
+You should install a virtual environment which is to be activated when code is to be run.
+Do note that Nvidia GPU with CUDA enabled is required.
 
-## Pre-Requisites 
-
-You should have Python 3 installed before using this tokenizer. Verify this with either:
-- `python --version`
-- `python3 --version`
-
-The project is set up in a virtualenv (`venv`)
-1) Create venv: `python -m venv .venv`
-2) Activate the virtualenv: 
+1) Activate the virtualenv: 
     - Windows: `.venv/bin/activate` or `ast-tokenizer/bin/activate.ps1` if in powershell
     - Linux/MacOS (based on shell): `source .venv/bin/activate.sh`
-3) Check that environment is activated - terminal prompt should show something like
+2) Check that environment is activated - terminal prompt should show something like
 ```
 (.venv) $
 ```
-3) Install dependencies - `pip install -r requirements.txt`
 
 ## Execution
 

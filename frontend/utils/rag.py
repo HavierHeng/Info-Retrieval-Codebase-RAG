@@ -9,9 +9,10 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(os.path.abspath('')), '../ast_tokenizer/languages')))
-from ...ast_tokenizer.languages.python_ast import PythonASTDocumentLoader
-from ...ast_tokenizer.languages.javascript_ast import JavascriptASTDocumentLoader
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(os.path.abspath('')), './ast_tokenizer/languages')))
+print(sys.path)
+from python_ast import PythonASTDocumentLoader
+from javascript_ast import JavascriptASTDocumentLoader
 
 
 
