@@ -1,14 +1,18 @@
 # SUTD Information Retrieval Project - Github Codebase RAG 
 
-
 ## Description
+This project aims to design a Retrieval Augmented Generation(RAG) system for understanding codebases in large and unfamiliar Git/GitHub repositories, especially when documentation is lacking or incomplete.
+
+The project consists of a Langchain RAG System, a streamlit frontend that has incorporated all the logic from the RAG system, and custom Abstract Syntax Tree (AST) document parser based on treesitter. 
+
+The RAG System runs locally on the host device, using open-source models and embeddings where possible.
 
 # Setup
 
 ## Hardware requirements
 
-The assumption is that your device has a Nvidia GPU with the appropriate CUDA 12 drivers. 
-This is needed for the LLM and FAISS and other parts of the project.
+The assumption is that the device has a Nvidia GPU with the appropriate CUDA 12 drivers. These can be checked via [Pytorch Installation Guide](https://pytorch.org/get-started/locally/).
+This is needed to accelerate the LLM, FAISS and other parts of the project.
 
 ## Pre-Requisites 
 
