@@ -12,7 +12,9 @@ The RAG System runs locally on the host device, using open-source models and emb
 ## Hardware requirements
 
 The assumption is that the device has a Nvidia GPU with the appropriate CUDA 12 drivers. These can be checked via [Pytorch Installation Guide](https://pytorch.org/get-started/locally/).
-This is needed to accelerate the LLM, FAISS and other parts of the project.
+This is needed to accelerate the LLM, FAISS and other parts of the project. If GPU VRAM is low, the tokens per second might be low leading to long wait times.
+
+Make sure there is sufficient disk space for the models. llama-3.1:8b itself takes up 5GB of space.
 
 ## Pre-Requisites 
 
@@ -31,6 +33,10 @@ The project is set up in a virtualenv (`venv`)
 ```
 4) Install dependencies - `pip install -r requirements.txt`
 
+You also need Ollama for ollama models to be running in the background as a web endpoint.
+1) Install Ollama
+2) Run Ollama with `ollama serve`
+3) Install the relevant model e.g for llama-3.1:8b - `ollama pull llama-3.1:8b`
 
 ## More information
 - [Tokenizer](ast_tokenizer/README.md)
