@@ -14,8 +14,8 @@ python_splitter = RecursiveCharacterTextSplitter.from_language(
 python_docs = python_splitter.create_documents([PYTHON_CODE])
 
 # for doc in python_docs:
-    # Splitter splits per line or statement naively
-    # print(type(doc), doc)
+# Splitter splits per line or statement naively
+# print(type(doc), doc)
 
 
 print("\n\n\n")
@@ -26,9 +26,9 @@ loader = PythonLoader("mainFile.py")
 loader_docs = loader.load()
 
 # for doc in loader_docs:
-    # PythonLoader has a large chunk size, but can load from files directly
-    # Results in one huge document, that needs further recursive splitting
-    # print(type(doc), doc)
+# PythonLoader has a large chunk size, but can load from files directly
+# Results in one huge document, that needs further recursive splitting
+# print(type(doc), doc)
 
 segmenter = PythonSegmenter(PYTHON_CODE)
 print(segmenter.is_valid())
