@@ -5,14 +5,21 @@ from langchain_community.vectorstores import FAISS
 from langchain_ollama import OllamaLLM
 # from langchain_community.llms import CTransformers
 from langchain_core.prompts import PromptTemplate
-from langchain.chains import RetrievalQA
+# from langchain.chains import RetrievalQA
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.text_splitter import NLTKTextSplitter
 import torch
 
 
-loader = DirectoryLoader("../capstone/S35-Capstone-Backend",
+system_prompt = """
+You are a helpful AI assistant that can answer technical questions about a specific codebase.
+You have access to relevant information from the codebase and can provide insights based on it.
+If none of the code from the codebase answer the question, just say 'I don't know'.
+Always prioritize correctness and clarity in your explanations.
+"""
+
+loader = DirectoryLoader("../testing",
                          glob="*.py", loader_cls=PythonLoader, recursive=True)
 # interpret information in the documents
 documents = loader.load()
@@ -53,7 +60,7 @@ llm = OllamaLLM(model="llama3.1:8b",
 retriever = db.as_retriever(search_kwargs={'k': 5})
 prompt = PromptTemplate(
     template=template,
-    input_variables=['context', 'input'])
+    input_variables=['system', 'context', 'input'])
 
 combine_docs_chain = create_stuff_documents_chain(llm, prompt)
 qa_llm = create_retrieval_chain(retriever, combine_docs_chain)
@@ -68,5 +75,5 @@ qa_llm = create_retrieval_chain(retriever, combine_docs_chain)
 
 while True:
     inputP = input("What do you want to ask?\n")
-    output = qa_llm.invoke({"input": inputP})
+    output = qa_llm.invoke({"system": system_prompt, "input": inputP})
     print(output["answer"])

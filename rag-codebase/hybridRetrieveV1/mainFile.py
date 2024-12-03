@@ -24,7 +24,9 @@ embeddings = HuggingFaceEmbeddings(
 #         folderPath, embeddings, allow_dangerous_deserialization=True)
 # else:
 
-loader = DirectoryLoader("/home/yuesheng/flask",
+# ../../../job-summarizer-ai/backend/app
+
+loader = DirectoryLoader("../../ast_tokenizer",
                          glob="*.py", loader_cls=PythonASTDocumentLoader, recursive=True)
 # interpret information in the documents
 documents = loader.load()
