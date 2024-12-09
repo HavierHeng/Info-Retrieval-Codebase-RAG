@@ -44,7 +44,7 @@ def customSplitter(listOfDocuments, token_len=2, overlap=1):
         pagecontent = document.page_content.lower()
         pagecontent = document.page_content.replace("_", " ")
         listToAdd = []
-        for x in range(overlap, len(pagecontent), token_len):
+        for x in range(overlap, len(pagecontent), token_len-overlap):
             end_index = min(x+token_len, len(pagecontent))
             listToAdd.append(pagecontent[x-overlap:end_index])
         listOfToken.append(listToAdd)
@@ -54,7 +54,7 @@ def customSplitter(listOfDocuments, token_len=2, overlap=1):
 def customQuerySplitter(query, token_len=2, overlap=1):
     listOfToken = []
 
-    for x in range(overlap, len(query), token_len):
+    for x in range(overlap, len(query), token_len-overlap):
         end_index = min(x+token_len, len(query))
         listOfToken.append(query[x-overlap:end_index])
     return listOfToken
