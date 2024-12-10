@@ -144,7 +144,10 @@ def import_metadata(tx, metadata):
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Load documents from a directory")
-    parser.add_argument('directory', type=str, help="The directory containing files to parse")
+    parser.add_argument("directory", type=str, help="The directory containing files to parse")
+    parser.add_argument("username", type=str, help="Neo4J database username", default="neo4j")
+    parser.add_argument("password", type=str, help="Neo4J database password", default="neo4j")
+    parser.add_argument("database", type=str, help="Neo4J database", default="testing")
     
     args = parser.parse_args()
 
@@ -159,16 +162,16 @@ def main():
 
     try:
         documents = loader.load()
-        print(f"Loaded {len(documents)} documents from {args.directory} (file type: {args.file_type})")
+        print(f"Loaded {len(documents)} documents from {args.directory})")
     except Exception as e:
         print(f"Error: {e}")
         raise e
 
     # Initialize Neo4j driver
     uri = "bolt://localhost:7687"
-    driver = GraphDatabase.driver(uri, auth=("neo4j", "password"))
+    driver = GraphDatabase.driver(uri, auth=(args.username, args.password))
 
-    with driver.session() as session:
+    with driver.session(database=args.database) as session:
         for document in tqdm(documents, desc="Graphing Documents..."):
             session.execute_write(import_metadata, document.metadata)
 
