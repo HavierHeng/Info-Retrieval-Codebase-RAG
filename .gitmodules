@@ -1,0 +1,3 @@
+[submodule "rag-codebase/evaluation/bleurt"]
+	path = rag-codebase/evaluation/bleurt
+	url = https://github.com/google-research/bleurt.git
