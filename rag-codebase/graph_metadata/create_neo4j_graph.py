@@ -21,7 +21,7 @@ FUNCTION_QUERY = """
     MERGE (parent)-[:CONTAINS]->(function)
 
     // Create CALLS relationships for functions the current function calls
-    WITH function, $functions_called AS functions_called
+    WITH function, parent, $functions_called AS functions_called
     UNWIND functions_called AS called_function
     MERGE (called_func:Function {name: called_function})
     MERGE (function)-[:CALLS]->(called_func)
@@ -42,7 +42,7 @@ CLASS_QUERY = """
     MERGE (file)-[:CONTAINS]->(class)
 
     // Create methods and link them to the class
-    WITH class, $methods AS methods
+    WITH class, file, $methods AS methods
     UNWIND methods AS method_data
     MERGE (method:Method {name: method_data.block_name, parent_class: $block_name, relative_path: $relative_path})
         ON CREATE SET method.start_offset = method_data.start_offset, method.end_offset = method_data.end_offset, method.comments = method_data.comments, method.docstrings = method_data.docstrings, method.functions_called = method_data.functions_called
