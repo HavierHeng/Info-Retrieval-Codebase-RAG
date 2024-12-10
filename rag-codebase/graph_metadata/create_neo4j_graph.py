@@ -21,7 +21,7 @@ FUNCTION_QUERY = """
     MERGE (parent)-[:CONTAINS]->(function)
 
     // Create CALLS relationships for functions the current function calls
-    WITH function, parent, $functions_called AS functions_called
+    WITH function, parent, file, $functions_called AS functions_called
     UNWIND functions_called AS called_function
     MERGE (called_func:Function {name: called_function})
     MERGE (function)-[:CALLS]->(called_func)
