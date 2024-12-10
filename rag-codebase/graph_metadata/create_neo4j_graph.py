@@ -16,18 +16,40 @@ FUNCTION_QUERY = """
     MERGE (function:Function {name: $block_name, relative_path: $relative_path})
         ON CREATE SET function.start_offset = $start_offset, function.end_offset = $end_offset, function.comments = $comments, function.docstrings = $docstrings, function.functions_called = $functions_called
 
-    // Link Function to its parent (either a Class or Others block)
-    MERGE (parent:Node {name: $parent_name, relative_path: $relative_path})
-    MERGE (parent)-[:CONTAINS]->(function)
+    // Link Function to its parent "others"
+    MERGE (others:Others {name: $parent_name, relative_path: $relative_path})
+    MERGE (others)-[:CONTAINS]->(function)
 
     // Create CALLS relationships for functions the current function calls
-    WITH function, parent, file, $functions_called AS functions_called
+    WITH function, others, file, $functions_called AS functions_called
     UNWIND functions_called AS called_function
     MERGE (called_func:Function {name: called_function})
     MERGE (function)-[:CALLS]->(called_func)
 
-    RETURN function, parent, file
+    RETURN function, others, file
     """
+
+# Methods has a parent_type as class instead
+METHOD_QUERY = """
+    // Create the File node if it doesn't exist
+    MERGE (file:File {path: $relative_path})
+
+    // Create the Function node if it doesn't exist
+    MERGE (function:Function {name: $block_name, relative_path: $relative_path})
+        ON CREATE SET function.start_offset = $start_offset, function.end_offset = $end_offset, function.comments = $comments, function.docstrings = $docstrings, function.functions_called = $functions_called
+
+    // Link Function to its parent "class"
+    MERGE (class:Class {name: $parent_name, relative_path: $relative_path})
+    MERGE (class)-[:CONTAINS]->(function)
+
+    // Create CALLS relationships for functions the current function calls
+    WITH function, class, file, $functions_called AS functions_called
+    UNWIND functions_called AS called_function
+    MERGE (called_func:Function {name: called_function})
+    MERGE (function)-[:CALLS]->(called_func)
+
+    RETURN function, class, file
+"""
 
 # Class contain references to methods
 CLASS_QUERY = """
@@ -130,7 +152,13 @@ def import_metadata(tx, metadata):
 
     """
     if metadata["block_type"] == "function":
-        query = FUNCTION_QUERY
+        if metadata["parent_type"] == "root":
+            query = FUNCTION_QUERY
+        elif metadata["parent_type"] == "class":
+            query = METHOD_QUERY 
+        else:
+            print("Unknown parent for function block type")
+            return
     elif metadata["block_type"] == "class": 
         query = CLASS_QUERY
     elif metadata["block_type"] == "others":
@@ -158,7 +186,7 @@ def parse_args():
 
 def main():
     args = parse_args()
-    loader = DirectoryLoader(args.directory, glob=f"*.py", loader_cls=PythonASTDocumentLoader)
+    loader = DirectoryLoader(args.directory, glob="*.py", loader_cls=PythonASTDocumentLoader, recursive=True)
 
     try:
         documents = loader.load()

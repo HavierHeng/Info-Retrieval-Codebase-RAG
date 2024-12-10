@@ -13,3 +13,7 @@ docker run -d \
 ```
 
 
+## Helpful Cypher commands
+
+Limit the listing of all nodes: `MATCH(n) RETURN n LIMIT 25`
+Wipe database: `MATCH(n) DETACH DELETE n`
