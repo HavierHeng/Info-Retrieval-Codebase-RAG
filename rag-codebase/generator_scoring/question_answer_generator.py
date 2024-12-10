@@ -67,12 +67,12 @@ def generate_question_answer_pair(llm_chain: Runnable, docs: List[Document], pai
                     "context": [content.page_content for content in sampled_context],
                     "question": question,
                     "answer": answer,
-                    "source_doc": [content.metadata["relative_path"] for content in sampled_context]
+                    "reference_file": [content.metadata["relative_path"] for content in sampled_context]
                 }
             )
         except:
             continue
-    return json.dumps(outputs)
+    return json.dumps(outputs, indent=4)
 
 
 def parse_args():
@@ -140,9 +140,24 @@ def main():
 
     qa_generation_prompt = PromptTemplate(template=""" 
     Your task is to write a factoid question and an answer given a context.
+    The question should be something a developer might naturally ask when analyzing or working with this code. For example:
+      - What does this function do?
+      - What will this return for input `foobar`?
+      - How does this behave when the input is negative?
+      - How do I deserialize json data?
+      - How do I start up a flask app server?
+      - How do I configure routes? 
+      - How do I create a custom error handler? 
+      - Are there ways to implement test cases for this part of my application? 
+      - Does flask handle password hashing? 
+      - Does flask have ORM features?
+      - Can you render frontend with flask?
+  
+    The question should not refer to the code as "this code" or "context", but rather focus on the actual behavior of the code.
+    Keep the question natural, as if you were explaining the code to someone else in a casual setting, and it must be formulated in the same style as questions users could ask in a search engine or a forum.
+    Provide your answer in a clear, technical manner, focused on the code’s functionality or expected behavior.
+
     Your factoid question should be answerable with a specific, concise piece of factual information from the context.
-    Your factoid question should be formulated in the same style as questions users could ask in a search engine.
-    This means that your factoid question MUST NOT mention something like "according to the passage" or "context".
 
     Provide your answer as follows:
 
