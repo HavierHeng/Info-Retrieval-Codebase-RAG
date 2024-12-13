@@ -86,38 +86,39 @@ llm = OllamaLLM(model="llama3.1:8b",
                 num_predict=-1,
                 temperature=0)
 
-# prompt = PromptTemplate(template="""
-# Context: {context}
-
-# You are a Python codebase analyzer. Use the provided repository context to answer questions. Reply the answer and with a code snippet if possible.
-# If you do now know the answer, just say you do not have enough information.
-# Cite specific files,function names, and locations in your answers. For example: "(Function: create_new_token, Path: home/User/repo/func.py)".
-# If a code snippet from a file/document is used, provide an inline numerical citation for it inside square brackets right after the reference.
-
-# At the end of your commentary, if you gave a good answer: 
-# 1. Create a numbered list of citations used with '(Path, function name)' format.
-                        
-# Question: {input} 
-
-# Answer:""", input_variables=['input', 'context'])
-
 prompt = PromptTemplate(template="""
-Here is the list of context documents : {context}
+Context: {context}
 
-You are a Python codebase analyzer. Use the provided repository context to answer questions with the following guidelines:
+You are a Python codebase analyzer. Use the provided repository context to answer questions. Reply the answer and with a code snippet if possible.
+If you do now know the answer, just say you do not have enough information.
+Use inline numerical citations [1], [2], etc. immediately after referencing any content from the provided documents
+If there are multiple references to the same document, use the same citation number
+If a specific line or section of code is directly used, place the citation right after that specific reference
 
-- Provide a comprehensive answer to the question using the given context
-- Include code snippets when relevant
-- Use inline numerical citations [1], [2], etc. immediately after referencing any content from the provided documents
-- If there are multiple references to the same document, use the same citation number
-- If a specific line or section of code is directly used, place the citation right after that specific reference
-- If you cannot confidently answer based on the provided context, state "I do not have enough information" and provide a reason
+At the end of your commentary, if you gave a good answer: 
+1. Create a "Citations" section with the number list of references in '1. (Path, function name)' format.
+                        
+Question: {input} 
 
-At the end of your answer, include a "Citations" section with the NUMBERED list of references used in the answer in the format: '1. (Full file path, specific function/context)'
+Answer:""", input_variables=['input', 'context'])
+
+# prompt = PromptTemplate(template="""
+# Here is the list of context documents : {context}
+
+# You are a Python codebase analyzer. Use the provided repository context to answer questions with the following guidelines:
+
+# - Provide a comprehensive answer to the question using the given context
+# - Include code snippets when relevant
+# - Use inline numerical citations [1], [2], etc. immediately after referencing any content from the provided documents
+# - If there are multiple references to the same document, use the same citation number
+# - If a specific line or section of code is directly used, place the citation right after that specific reference
+# - If you cannot confidently answer based on the provided context, state "I do not have enough information" and provide a reason
+
+# At the end of your answer, include a "Citations" section with the NUMBERED list of references used in the answer in the format: '1. (Full file path, specific function/context)'
                             
-Question: {input}
+# Question: {input}
 
-Answer: """, input_variables=['input', 'context'])
+# Answer: """, input_variables=['input', 'context'])
 
 
 # qa_llm = RetrievalQA.from_chain_type(llm=llm,
