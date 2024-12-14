@@ -67,17 +67,18 @@ prompt = PromptTemplate(template="""
 Context: {context}
 
 You are a Python codebase analyzer. Use the provided repository context to answer questions. Reply the answer and with a code snippet if possible.
-If you do now know the answer, just say you do not have enough information.
-Cite specific files,function names, and locations in your answers. For example: "(Function: create_new_token, Path: home/User/repo/func.py)".
+- If you do now know the answer, just say you do not have enough information.
+- Use inline numerical citations [1], [2], etc. immediately after referencing any content from the provided documents
+- If there are multiple references to the same document, use the same citation number
+- If a specific line or section of code is directly used, place the citation right after that specific reference
 
 At the end of your commentary, if you gave a good answer: 
 1. Create a list of citations used with (Path, function name)
-
+2. Cite specific files,function names, and locations in your answers. For example: "1. (Function: create_new_token, Path: home/User/repo/func.py)".
+3. Use "/" as standard path separator.                
 Question: {input} 
 
-Answer:""",
-input_variables=['input', 'context'])
-
+Answer:""", input_variables=['input', 'context'])
 
 
 # qa_llm = RetrievalQA.from_chain_type(llm=llm,
@@ -125,5 +126,6 @@ for question in questions:
                     f"Folder:{d.metadata['relative_path']} Block Type{d.metadata['block_type']} Function name: {d.metadata['block_name']}")
         elif 'answer' in chunk.keys():
             print(chunk['answer'], end="", flush=True)
+    print("\n")
     print("context:", context)
     print()

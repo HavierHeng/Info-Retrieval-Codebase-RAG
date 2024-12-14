@@ -103,22 +103,21 @@ Question: {input}
 Answer:""", input_variables=['input', 'context'])
 
 # prompt = PromptTemplate(template="""
-# Here is the list of context documents : {context}
+# Context: {context}
 
-# You are a Python codebase analyzer. Use the provided repository context to answer questions with the following guidelines:
-
-# - Provide a comprehensive answer to the question using the given context
-# - Include code snippets when relevant
+# You are a Python codebase analyzer. Use the provided repository context to answer questions. Reply the answer and with a code snippet if possible.
+# - If you do now know the answer, just say you do not have enough information.
 # - Use inline numerical citations [1], [2], etc. immediately after referencing any content from the provided documents
 # - If there are multiple references to the same document, use the same citation number
 # - If a specific line or section of code is directly used, place the citation right after that specific reference
-# - If you cannot confidently answer based on the provided context, state "I do not have enough information" and provide a reason
 
-# At the end of your answer, include a "Citations" section with the NUMBERED list of references used in the answer in the format: '1. (Full file path, specific function/context)'
-                            
-# Question: {input}
+# At the end of your commentary, if you gave a good answer: 
+# 1. Create a list of citations used with (Path, function name)
+# 2. Cite specific files,function names, and locations in your answers. For example: "1. (Function: create_new_token, Path: home/User/repo/func.py)".
+# 3. Use "/" as standard path separator.                
+# Question: {input} 
 
-# Answer: """, input_variables=['input', 'context'])
+# Answer:""", input_variables=['input', 'context'])
 
 
 # qa_llm = RetrievalQA.from_chain_type(llm=llm,
