@@ -26,7 +26,7 @@ embeddings = HuggingFaceEmbeddings(
 #         folderPath, embeddings, allow_dangerous_deserialization=True)
 # else:
 
-loader = DirectoryLoader("../../ast_tokenizer",
+loader = DirectoryLoader("../../../flask",
                          glob="*.py", loader_cls=PythonASTDocumentLoader, recursive=True)
 # interpret information in the documents
 documents = loader.load()
@@ -56,23 +56,29 @@ bm25_retriever.k = 2  # Retrieve top 5 results
 
 faiss_retriever = db.as_retriever(search_kwargs={'k': 2})
 
-retriever = EnsembleRetriever(retrievers=[bm25_retriever, faiss_retriever], weights=[0.7, 0.3])
+retriever = EnsembleRetriever(retrievers=[bm25_retriever, faiss_retriever], weights=[0.6, 0.4])
 
 # load the language model
 llm = OllamaLLM(model="llama3.1:8b",
                 num_predict=-1,
-                temperature=0.05)
+                temperature=0)
 
 prompt = PromptTemplate(template="""
-You are a master python programmer. Use the following pieces of retrieved context to answer the question. 
-If you don't know the answer, just say that you don't know. The context will simplified python code.
+Context: {context}
 
+You are a Python codebase analyzer. Use the provided repository context to answer questions. Reply the answer and with a code snippet if possible.
+- If you do now know the answer, just say you do not have enough information.
+- Use inline numerical citations [1], [2], etc. immediately after referencing any content from the provided documents
+- If there are multiple references to the same document, use the same citation number
+- If a specific line or section of code is directly used, place the citation right after that specific reference
+
+At the end of your commentary, if you gave a good answer: 
+1. Create a list of citations used with (Path, function name)
+2. Cite specific files,function names, and locations in your answers. For example: "1. (Function: create_new_token, Path: home/User/repo/func.py)".
+3. Use "/" as standard path separator.                
 Question: {input} 
 
-Context: {context} 
-
-Answer:""",
-input_variables=['input', 'context'])
+Answer:""", input_variables=['input', 'context'])
 
 
 # qa_llm = RetrievalQA.from_chain_type(llm=llm,
@@ -91,19 +97,35 @@ input_variables=['input', 'context'])
 #     | StrOutputParser()
 # )
 
+questions = ["How do I deserialize json data?",
+    "How do I start up a flask app server?",
+    "How do I configure routes?",
+    "How do I create a custom error handler?",
+    "Does flask handle password hashing?",
+    "Does flask have ORM features?",
+    "How do I set up logging in flask?",
+    "Are there ways to implement test cases for my flask application?",
+    "Can you render frontend with flask?",
+    "How do I implement middleware?"]
 
-while True:
+# while True:
+for question in questions:
+    # inputP = input("What do you want to ask?\n")
 
-    inputP = input("What do you want to ask?\n")
     qa_chain = create_stuff_documents_chain(llm, prompt)
     rag_chain = create_retrieval_chain(retriever, qa_chain)
+    context = []
 
-    for chunk in rag_chain.stream({"input": inputP}):
+    print("Question:", question)
+    for chunk in rag_chain.stream({"input": question}):
         if 'context' in chunk.keys():
             print("Retrieved Docs from")
             for d in chunk['context']:
+                context.append(d.page_content)
                 print(
                     f"Folder:{d.metadata['relative_path']} Block Type{d.metadata['block_type']} Function name: {d.metadata['block_name']}")
         elif 'answer' in chunk.keys():
             print(chunk['answer'], end="", flush=True)
+    print("\n")
+    print("context:", context)
     print()
