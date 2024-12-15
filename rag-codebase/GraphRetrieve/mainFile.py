@@ -34,28 +34,6 @@ for docs in documents:
     docs.page_content = newContent
 
 
-def customSplitter(listOfDocuments, token_len=2, overlap=1):
-    listOfToken = []
-    for document in listOfDocuments:
-        pagecontent = document.page_content.lower()
-        pagecontent = document.page_content.replace("_", " ")
-        listToAdd = []
-        for x in range(overlap, len(pagecontent), token_len-overlap):
-            end_index = min(x+token_len, len(pagecontent))
-            listToAdd.append(pagecontent[x-overlap:end_index])
-        listOfToken.append(listToAdd)
-    return listOfToken
-
-
-def customQuerySplitter(query, token_len=2, overlap=1):
-    listOfToken = []
-
-    for x in range(overlap, len(query), token_len-overlap):
-        end_index = min(x+token_len, len(query))
-        listOfToken.append(query[x-overlap:end_index])
-    return listOfToken
-
-
 # load the language model - preferably one that is very good at writing code 
 llm = OllamaLLM(model="llama3.1:8b",
                 num_predict=-1,
