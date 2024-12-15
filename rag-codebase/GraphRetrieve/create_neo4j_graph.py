@@ -5,6 +5,7 @@ from langchain_community.document_loaders import DirectoryLoader
 from tqdm import tqdm
 import argparse
 from python_ast import PythonASTDocumentLoader
+import re
 import os
 
 # Functions include both class methods and functions
@@ -16,17 +17,16 @@ FUNCTION_QUERY = """
     MERGE (function:Function {name: $block_name, relative_path: $relative_path})
         ON CREATE SET function.start_offset = $start_offset, function.end_offset = $end_offset, function.comments = $comments, function.docstrings = $docstrings, function.functions_called = $functions_called
 
-    // Link Function to its parent "others"
-    MERGE (others:Others {name: $parent_name, relative_path: $relative_path})
-    MERGE (others)-[:CONTAINS]->(function)
+    // Create relationship from File to function block
+    MERGE (function)-[:IN]->(file)
 
     // Create CALLS relationships for functions the current function calls
-    WITH function, others, file, $functions_called AS functions_called
+    WITH function, file, $functions_called AS functions_called
     UNWIND functions_called AS called_function
-    MERGE (called_func:Function {name: called_function})
+    MERGE (called_func:Calls {name: called_function})
     MERGE (function)-[:CALLS]->(called_func)
 
-    RETURN function, others, file
+    RETURN function, file
     """
 
 # Methods has a parent_type as class instead
@@ -35,17 +35,20 @@ METHOD_QUERY = """
     MERGE (file:File {path: $relative_path})
 
     // Create the Function node if it doesn't exist
-    MERGE (function:Function {name: $block_name, relative_path: $relative_path})
+    MERGE (function:Method {name: $block_name, relative_path: $relative_path})
         ON CREATE SET function.start_offset = $start_offset, function.end_offset = $end_offset, function.comments = $comments, function.docstrings = $docstrings, function.functions_called = $functions_called
 
     // Link Function to its parent "class"
     MERGE (class:Class {name: $parent_name, relative_path: $relative_path})
-    MERGE (class)-[:CONTAINS]->(function)
+    MERGE (class)-[:DEFINES]->(function)
+
+    // Create relationship from File to function block
+    MERGE (function)-[:IN]->(file)
 
     // Create CALLS relationships for functions the current function calls
     WITH function, class, file, $functions_called AS functions_called
     UNWIND functions_called AS called_function
-    MERGE (called_func:Function {name: called_function})
+    MERGE (called_func:Calls {name: called_function})
     MERGE (function)-[:CALLS]->(called_func)
 
     RETURN function, class, file
@@ -61,7 +64,7 @@ CLASS_QUERY = """
         ON CREATE SET class.start_offset = $start_offset, class.end_offset = $end_offset, class.comments = $comments, class.docstrings = $docstrings
 
     // Create relationship from File to Class block
-    MERGE (file)-[:CONTAINS]->(class)
+    MERGE (class)-[:IN]->(file)
 
     // Create methods and link them to the class
     WITH class, file, $methods AS methods
@@ -85,10 +88,17 @@ OTHERS_QUERY = """
         ON CREATE SET others.start_offset = $start_offset, others.end_offset = $end_offset, others.comments = $comments, others.docstrings = $docstrings, others.functions_called = $functions_called
 
     // Create relationship from File to Others block
-    MERGE (file)-[:CONTAINS]->(others)
+    MERGE (others)-[:IN]->(file)
+
+    // Create CALLS relationships for others with the current function calls
+    WITH others, file, $functions_called AS functions_called
+    UNWIND functions_called AS called_function
+    MERGE (called_func:Calls {name: called_function})
+    MERGE (others)-[:CALLS]->(called_func)
 
     RETURN others, file
     """
+
 
 # Function to import a JSON object into Neo4j
 def import_metadata(tx, metadata):
