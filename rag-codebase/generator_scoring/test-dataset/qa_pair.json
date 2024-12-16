@@ -1,0 +1,982 @@
+[
+    {
+        "context": [
+            "def tag(self, value: t.Any) -> dict[str, t.Any]:\n        \"\"\"Convert the value to a valid JSON type and add the tag structure\n        around it.\"\"\"\n        return {self.key: self.to_json(value)}"
+        ],
+        "question": "What data types does the `to_json` method support for conversion?\n",
+        "answer": "The `to_json` method supports conversion of Python's built-in types, such as integers, floats, strings, booleans, and lists.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/json/tag.py"
+        ]
+    },
+    {
+        "context": [
+            "class TagMarkup(JSONTag):\n    \"\"\"Serialize anything matching the :class:`~markupsafe.Markup` API by\n    having a ``__html__`` method to the result of that method. Always\n    deserializes to an instance of :class:`~markupsafe.Markup`.\"\"\"\n\n    __slots__ = ()\n    key = \" m\"\n\n    # Code for function: TagMarkup.check(self, value: t.Any)\n# Code for function: TagMarkup.to_json(self, value: t.Any)\n# Code for function: TagMarkup.to_python(self, value: t.Any)\n"
+        ],
+        "question": "What is the key used by the TagMarkup class to serialize and deserialize data?\n",
+        "answer": "The key used by the TagMarkup class is \" m\".",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/json/tag.py"
+        ]
+    },
+    {
+        "context": [
+            "def redirect(self, location: str, code: int = 302) -> BaseResponse:\n        \"\"\"Create a redirect response object.\n\n        This is called by :func:`flask.redirect`, and can be called\n        directly as well.\n\n        :param location: The URL to redirect to.\n        :param code: The status code for the redirect.\n\n        .. versionadded:: 2.2\n            Moved from ``flask.redirect``, which calls this method.\n        \"\"\"\n        return _wz_redirect(\n            location,\n            code=code,\n            Response=self.response_class,  # type: ignore[arg-type]\n        )"
+        ],
+        "question": "What is the default status code used for redirects by the `redirect` function?\n",
+        "answer": "The default status code used for redirects by the `redirect` function is 302.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/sansio/app.py"
+        ]
+    },
+    {
+        "context": [
+            "def open_instance_resource(\n        self, resource: str, mode: str = \"rb\", encoding: str | None = \"utf-8\"\n    ) -> t.IO[t.AnyStr]:\n        \"\"\"Open a resource file relative to the application's instance folder\n        :attr:`instance_path`. Unlike :meth:`open_resource`, files in the\n        instance folder can be opened for writing.\n\n        :param resource: Path to the resource relative to :attr:`instance_path`.\n        :param mode: Open the file in this mode.\n        :param encoding: Open the file with this encoding when opening in text\n            mode. This is ignored when opening in binary mode.\n\n        .. versionchanged:: 3.1\n            Added the ``encoding`` parameter.\n        \"\"\"\n        path = os.path.join(self.instance_path, resource)\n\n        if \"b\" in mode:\n            return open(path, mode)\n\n        return open(path, mode, encoding=encoding)"
+        ],
+        "question": "What is the default file mode used when opening a resource file with the `open_instance_resource` method?\n",
+        "answer": "The default file mode used is \"rb\", which opens the file in binary read mode.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/app.py"
+        ]
+    },
+    {
+        "context": [
+            "def _iter_loaders(self, template: str) -> t.Iterator[tuple[Scaffold, BaseLoader]]:\n        loader = self.app.jinja_loader\n        if loader is not None:\n            yield self.app, loader\n\n        for blueprint in self.app.iter_blueprints():\n            loader = blueprint.jinja_loader\n            if loader is not None:\n                yield blueprint, loader"
+        ],
+        "question": "How many types of loaders are yielded by the _iter_loaders method?\n",
+        "answer": "Two types of loaders are yielded: the app's Jinja loader and each blueprint's Jinja loader.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/templating.py"
+        ]
+    },
+    {
+        "context": [
+            "// Code for Global Scope\nfrom __future__ import annotations\nimport importlib.util\nimport os\nimport sys\nimport typing as t\nfrom datetime import datetime\nfrom functools import cache\nfrom functools import update_wrapper\nimport werkzeug.utils\nfrom werkzeug.exceptions import abort as _wz_abort\nfrom werkzeug.utils import redirect as _wz_redirect\nfrom werkzeug.wrappers import Response as BaseResponse\nfrom .globals import _cv_request\nfrom .globals import current_app\nfrom .globals import request\nfrom .globals import request_ctx\nfrom .globals import session\nfrom .signals import message_flashed\nif t.TYPE_CHECKING:  # pragma: no cover\n    from .wrappers import Response\n# Code for function: get_debug_flag()\n# Code for function: get_load_dotenv(default: bool = True)\n@t.overload\ndef stream_with_context(\n    generator_or_function: t.Iterator[t.AnyStr],\n) -> t.Iterator[t.AnyStr]: ...\n@t.overload\ndef stream_with_context(\n    generator_or_function: t.Callable[..., t.Iterator[t.AnyStr]],\n) -> t.Callable[[t.Iterator[t.AnyStr]], t.Iterator[t.AnyStr]]: ...\n# Code for function: stream_with_context(generator_or_function: t.Iterator[t.AnyStr] | t.Callable[..., t.Iterator[t.AnyStr]], , *args: t.Any, **kwargs: t.Any, )\n# Code for function: make_response(*args: t.Any)\n# Code for function: url_for(endpoint: str, *, _anchor: str | None = None, _method: str | None = None, _scheme: str | None = None, _external: bool | None = None, **values: t.Any, )\n# Code for function: redirect(location: str, code: int = 302, Response: type[BaseResponse] | None = None)\n# Code for function: abort(code: int | BaseResponse, *args: t.Any, **kwargs: t.Any)\n# Code for function: get_template_attribute(template_name: str, attribute: str)\n# Code for function: flash(message: str, category: str = \"message\")\n# Code for function: get_flashed_messages(with_categories: bool = False, category_filter: t.Iterable[str] = ())\n# Code for function: _prepare_send_file_kwargs(**kwargs: t.Any)\n# Code for function: send_file(path_or_file: os.PathLike[t.AnyStr] | str | t.BinaryIO, mimetype: str | None = None, as_attachment: bool = False, download_name: str | None = None, conditional: bool = True, etag: bool | str = True, last_modified: datetime | int | float | None = None, max_age: None | (int | t.Callable[[str | None], int | None]) = None, )\n# Code for function: send_from_directory(directory: os.PathLike[str] | str, path: os.PathLike[str] | str, **kwargs: t.Any, )\n# Code for function: get_root_path(import_name: str)\n@cache\ndef _split_blueprint_path(name: str) -> list[str]:\n    out: list[str] = [name]\n\n    if \".\" in name:\n        out.extend(_split_blueprint_path(name.rpartition(\".\")[0]))\n\n    return out\n"
+        ],
+        "question": "What is the purpose of the `_split_blueprint_path` function?\n",
+        "answer": "The `_split_blueprint_path` function splits a blueprint path into its constituent parts, handling cases where the path contains nested blueprints. It returns a list of strings representing the path hierarchy.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/helpers.py"
+        ]
+    },
+    {
+        "context": [
+            "def async_to_sync(\n        self, func: t.Callable[..., t.Coroutine[t.Any, t.Any, t.Any]]\n    ) -> t.Callable[..., t.Any]:\n        \"\"\"Return a sync function that will run the coroutine function.\n\n        .. code-block:: python\n\n            result = app.async_to_sync(func)(*args, **kwargs)\n\n        Override this method to change how the app converts async code\n        to be synchronously callable.\n\n        .. versionadded:: 2.0\n        \"\"\"\n        try:\n            from asgiref.sync import async_to_sync as asgiref_async_to_sync\n        except ImportError:\n            raise RuntimeError(\n                \"Install Flask with the 'async' extra in order to use async views.\"\n            ) from None\n\n        return asgiref_async_to_sync(func)"
+        ],
+        "question": "What is required to be installed for using async views?\n",
+        "answer": "The 'async' extra of Flask.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/app.py"
+        ]
+    },
+    {
+        "context": [
+            "def to_json(self, value: t.Any) -> t.Any:\n        return http_date(value)"
+        ],
+        "question": "What data type does the `to_json` function return?\n",
+        "answer": "The `to_json` function returns a datetime object.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/json/tag.py"
+        ]
+    },
+    {
+        "context": [
+            "// Code for Global Scope\nfrom __future__ import annotations\nfrom http import HTTPStatus\nfrom werkzeug.exceptions import BadRequest\nfrom werkzeug.exceptions import NotFound\nfrom flask import Flask\napp = Flask(__name__)\n@app.errorhandler(400)\n@app.errorhandler(HTTPStatus.BAD_REQUEST)\n@app.errorhandler(BadRequest)\ndef handle_400(e: BadRequest) -> str:\n    return \"\"\n@app.errorhandler(ValueError)\ndef handle_custom(e: ValueError) -> str:\n    return \"\"\n@app.errorhandler(ValueError)\ndef handle_accept_base(e: Exception) -> str:\n    return \"\"\n@app.errorhandler(BadRequest)\n@app.errorhandler(404)\ndef handle_multiple(e: BadRequest | NotFound) -> str:\n    return \"\"\n"
+        ],
+        "question": "How many error handlers are defined for the 400 status code?\n",
+        "answer": "There are three error handlers defined for the 400 status code.",
+        "source_doc": [
+            "/home/javier/Documents/flask/tests/type_check/typing_error_handler.py"
+        ]
+    },
+    {
+        "context": [
+            "// Code for Global Scope\nimport pytest\nfrom jinja2 import TemplateNotFound\nfrom werkzeug.http import parse_cache_control_header\nimport flask\n# Code for function: test_blueprint_specific_error_handling(app, client, , e, e, , , e)\n# Code for function: test_blueprint_specific_user_error_handling(app, client, e, e, , )\n# Code for function: test_blueprint_app_error_handling(app, client, e, , )\n@pytest.mark.parametrize(\n    (\"prefix\", \"rule\", \"url\"),\n    (\n        (\"\", \"/\", \"/\"),\n        (\"/\", \"\", \"/\"),\n        (\"/\", \"/\", \"/\"),\n        (\"/foo\", \"\", \"/foo\"),\n        (\"/foo/\", \"\", \"/foo/\"),\n        (\"\", \"/bar\", \"/bar\"),\n        (\"/foo/\", \"/bar\", \"/foo/bar\"),\n        (\"/foo/\", \"bar\", \"/foo/bar\"),\n        (\"/foo\", \"/bar\", \"/foo/bar\"),\n        (\"/foo/\", \"//bar\", \"/foo/bar\"),\n        (\"/foo//\", \"/bar\", \"/foo/bar\"),\n    ),\n)\ndef test_blueprint_prefix_slash(app, client, prefix, rule, url):\n    bp = flask.Blueprint(\"test\", __name__, url_prefix=prefix)\n\n    @bp.route(rule)\n    def index():\n        return \"\", 204\n\n    app.register_blueprint(bp)\n    assert client.get(url).status_code == 204\n# Code for function: test_blueprint_url_defaults(app, client, bar, baz, bar)\n# Code for function: test_blueprint_url_processors(app, client, endpoint, values, , endpoint, values, )\n# Code for function: test_templates_and_static(test_apps)\n# Code for function: test_default_static_max_age(app, self, filename)\n# Code for function: test_templates_list(test_apps)\n# Code for function: test_dotted_name_not_allowed(app, client)\n# Code for function: test_empty_name_not_allowed(app, client)\n# Code for function: test_dotted_names_from_app(app, client, , )\n# Code for function: test_empty_url_defaults(app, client, page)\n# Code for function: test_route_decorator_custom_endpoint(app, client, , , , , )\n# Code for function: test_route_decorator_custom_endpoint_with_dots(app, client, )\n# Code for function: test_endpoint_decorator(app, client, )\n# Code for function: test_template_filter(app, s)\n# Code for function: test_add_template_filter(app, s)\n# Code for function: test_template_filter_with_name(app, s)\n# Code for function: test_add_template_filter_with_name(app, s)\n# Code for function: test_template_filter_with_template(app, client, , s)\n# Code for function: test_template_filter_after_route_with_template(app, client, s, )\n# Code for function: test_add_template_filter_with_template(app, client, s, )\n# Code for function: test_template_filter_with_name_and_template(app, client, , s)\n# Code for function: test_add_template_filter_with_name_and_template(app, client, s, )\n# Code for function: test_template_test(app, value)\n# Code for function: test_add_template_test(app, value)\n# Code for function: test_template_test_with_name(app, value)\n# Code for function: test_add_template_test_with_name(app, value)\n# Code for function: test_template_test_with_template(app, client, value, )\n# Code for function: test_template_test_after_route_with_template(app, client, value, )\n# Code for function: test_add_template_test_with_template(app, client, , value)\n# Code for function: test_template_test_with_name_and_template(app, client, , value)\n# Code for function: test_add_template_test_with_name_and_template(app, client, , value)\n# Code for function: test_context_processing(app, client, , , , , )\n# Code for function: test_template_global(app, )\n# Code for function: test_request_processing(app, client, , exc, response, )\n# Code for function: test_app_request_processing(app, client, response, exc, , )\n# Code for function: test_app_url_processors(app, client, endpoint, values, , , endpoint, values)\n# Code for function: test_nested_blueprint(app, client, , , e, , , e, , )\n# Code for function: test_nested_callback_order(, e=None, , , e=None, app, client, , , e=None, e=None, , , e=None, , e=None, , , )\n@pytest.mark.parametrize(\n    \"parent_init, child_init, parent_registration, child_registration\",\n    [\n        (\"/parent\", \"/child\", None, None),\n        (\"/parent\", None, None, \"/child\"),\n        (None, None, \"/parent\", \"/child\"),\n        (\"/other\", \"/something\", \"/parent\", \"/child\"),\n    ],\n)\ndef test_nesting_url_prefixes(\n    parent_init,\n    child_init,\n    parent_registration,\n    child_registration,\n    app,\n    client,\n) -> None:\n    parent = flask.Blueprint(\"parent\", __name__, url_prefix=parent_init)\n    child = flask.Blueprint(\"child\", __name__, url_prefix=child_init)\n\n    @child.route(\"/\")\n    def index():\n        return \"index\"\n\n    parent.register_blueprint(child, url_prefix=child_registration)\n    app.register_blueprint(parent, url_prefix=parent_registration)\n\n    response = client.get(\"/parent/child/\")\n    assert response.status_code == 200\n# Code for function: test_nesting_subdomains(app, client, )\n# Code for function: test_child_and_parent_subdomain(app, client, )\n# Code for function: test_unique_blueprint_names(app, client)\n# Code for function: test_self_registration(app, client)\n# Code for function: test_blueprint_renaming(app, client, , _: Exception, , )\n"
+        ],
+        "question": "How many different combinations of URL prefixes and rules are tested in the `test_blueprint_prefix_slash` function?\n",
+        "answer": "11 different combinations.",
+        "source_doc": [
+            "/home/javier/Documents/flask/tests/test_blueprints.py"
+        ]
+    },
+    {
+        "context": [
+            "def invoke(  # type: ignore\n        self, cli: t.Any = None, args: t.Any = None, **kwargs: t.Any\n    ) -> Result:\n        \"\"\"Invokes a CLI command in an isolated environment. See\n        :meth:`CliRunner.invoke <click.testing.CliRunner.invoke>` for\n        full method documentation. See :ref:`testing-cli` for examples.\n\n        If the ``obj`` argument is not given, passes an instance of\n        :class:`~flask.cli.ScriptInfo` that knows how to load the Flask\n        app being tested.\n\n        :param cli: Command object to invoke. Default is the app's\n            :attr:`~flask.app.Flask.cli` group.\n        :param args: List of strings to invoke the command with.\n\n        :return: a :class:`~click.testing.Result` object.\n        \"\"\"\n        if cli is None:\n            cli = self.app.cli\n\n        if \"obj\" not in kwargs:\n            kwargs[\"obj\"] = ScriptInfo(create_app=lambda: self.app)\n\n        return super().invoke(cli, args, **kwargs)"
+        ],
+        "question": "What does the `invoke` method do when no `cli` argument is provided?\n",
+        "answer": "The `invoke` method uses the app's `cli` group as the command object to invoke.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/testing.py"
+        ]
+    },
+    {
+        "context": [
+            "def __init__(\n        self,\n        app: Flask,\n        path: str = \"/\",\n        base_url: str | None = None,\n        subdomain: str | None = None,\n        url_scheme: str | None = None,\n        *args: t.Any,\n        **kwargs: t.Any,\n    ) -> None:\n        assert not (base_url or subdomain or url_scheme) or (\n            base_url is not None\n        ) != bool(\n            subdomain or url_scheme\n        ), 'Cannot pass \"subdomain\" or \"url_scheme\" with \"base_url\".'\n\n        if base_url is None:\n            http_host = app.config.get(\"SERVER_NAME\") or \"localhost\"\n            app_root = app.config[\"APPLICATION_ROOT\"]\n\n            if subdomain:\n                http_host = f\"{subdomain}.{http_host}\"\n\n            if url_scheme is None:\n                url_scheme = app.config[\"PREFERRED_URL_SCHEME\"]\n\n            url = urlsplit(path)\n            base_url = (\n                f\"{url.scheme or url_scheme}://{url.netloc or http_host}\"\n                f\"/{app_root.lstrip('/')}\"\n            )\n            path = url.path\n\n            if url.query:\n                path = f\"{path}?{url.query}\"\n\n        self.app = app\n        super().__init__(path, base_url, *args, **kwargs)"
+        ],
+        "question": "What is the default value of `http_host` when `base_url` is None?\n\n",
+        "answer": "The default value of `http_host` is either the value of `SERVER_NAME` from the Flask app config or \"localhost\".",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/testing.py"
+        ]
+    },
+    {
+        "context": [
+            "def _get_source_fast(\n        self, environment: BaseEnvironment, template: str\n    ) -> tuple[str, str | None, t.Callable[[], bool] | None]:\n        for _srcobj, loader in self._iter_loaders(template):\n            try:\n                return loader.get_source(environment, template)\n            except TemplateNotFound:\n                continue\n        raise TemplateNotFound(template)"
+        ],
+        "question": "What is the purpose of the `_get_source_fast` method?\n",
+        "answer": "The `_get_source_fast` method attempts to quickly retrieve a source object for a given template by iterating over loaders and returning the first successful result, or raises `TemplateNotFound` if none are found.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/templating.py"
+        ]
+    },
+    {
+        "context": [
+            "def open_resource(\n        self, resource: str, mode: str = \"rb\", encoding: str | None = \"utf-8\"\n    ) -> t.IO[t.AnyStr]:\n        \"\"\"Open a resource file relative to :attr:`root_path` for reading. The\n        blueprint-relative equivalent of the app's :meth:`~.Flask.open_resource`\n        method.\n\n        :param resource: Path to the resource relative to :attr:`root_path`.\n        :param mode: Open the file in this mode. Only reading is supported,\n            valid values are ``\"r\"`` (or ``\"rt\"``) and ``\"rb\"``.\n        :param encoding: Open the file with this encoding when opening in text\n            mode. This is ignored when opening in binary mode.\n\n        .. versionchanged:: 3.1\n            Added the ``encoding`` parameter.\n        \"\"\"\n        if mode not in {\"r\", \"rt\", \"rb\"}:\n            raise ValueError(\"Resources can only be opened for reading.\")\n\n        path = os.path.join(self.root_path, resource)\n\n        if mode == \"rb\":\n            return open(path, mode)  # pyright: ignore\n\n        return open(path, mode, encoding=encoding)"
+        ],
+        "question": "What are the valid values for the `mode` parameter in the `open_resource` method?\n",
+        "answer": "The valid values for the `mode` parameter are `\"r\"`, `\"rt\"`, and `\"rb\"`.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/blueprints.py"
+        ]
+    },
+    {
+        "context": [
+            "def __init__(self, *args, **kwargs):\n        self._io = io.BytesIO(*args, **kwargs)"
+        ],
+        "question": "What type of object does the `__init__` method create?\n",
+        "answer": "The `__init__` method creates an instance of the `BytesIO` class from the `io` module.",
+        "source_doc": [
+            "/home/javier/Documents/flask/tests/test_helpers.py"
+        ]
+    },
+    {
+        "context": [
+            "def check(self, value: t.Any) -> bool:\n        return isinstance(value, datetime)"
+        ],
+        "question": "What type of values does the `check` method accept?\n",
+        "answer": "The `check` method accepts any type of value that is an instance of the `datetime` class.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/json/tag.py"
+        ]
+    },
+    {
+        "context": [
+            "class SessionMixin(MutableMapping[str, t.Any]):\n    \"\"\"Expands a basic dictionary with session attributes.\"\"\"\n\n    @property\n    def permanent(self) -> bool:\n        \"\"\"This reflects the ``'_permanent'`` key in the dict.\"\"\"\n        return self.get(\"_permanent\", False)\n\n    @permanent.setter\n    def permanent(self, value: bool) -> None:\n        self[\"_permanent\"] = bool(value)\n\n    #: Some implementations can detect whether a session is newly\n    #: created, but that is not guaranteed. Use with caution. The mixin\n    # default is hard-coded ``False``.\n    new = False\n\n    #: Some implementations can detect changes to the session and set\n    #: this when that happens. The mixin default is hard coded to\n    #: ``True``.\n    modified = True\n\n    #: Some implementations can detect when session data is read or\n    #: written and set this when that happens. The mixin default is hard\n    #: coded to ``True``.\n    accessed = True"
+        ],
+        "question": "What is the default value of the `modified` attribute in the SessionMixin class?\n",
+        "answer": "The default value of the `modified` attribute in the SessionMixin class is `True`.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/sessions.py"
+        ]
+    },
+    {
+        "context": [
+            "def handle_url_build_error(\n        self, error: BuildError, endpoint: str, values: dict[str, t.Any]\n    ) -> str:\n        \"\"\"Called by :meth:`.url_for` if a\n        :exc:`~werkzeug.routing.BuildError` was raised. If this returns\n        a value, it will be returned by ``url_for``, otherwise the error\n        will be re-raised.\n\n        Each function in :attr:`url_build_error_handlers` is called with\n        ``error``, ``endpoint`` and ``values``. If a function returns\n        ``None`` or raises a ``BuildError``, it is skipped. Otherwise,\n        its return value is returned by ``url_for``.\n\n        :param error: The active ``BuildError`` being handled.\n        :param endpoint: The endpoint being built.\n        :param values: The keyword arguments passed to ``url_for``.\n        \"\"\"\n        for handler in self.url_build_error_handlers:\n            try:\n                rv = handler(error, endpoint, values)\n            except BuildError as e:\n                # make error available outside except block\n                error = e\n            else:\n                if rv is not None:\n                    return rv\n\n        # Re-raise if called with an active exception, otherwise raise\n        # the passed in exception.\n        if error is sys.exc_info()[1]:\n            raise\n\n        raise error"
+        ],
+        "question": "What happens when a handler function returns None?\n",
+        "answer": "If a handler function returns None, it will be skipped and the next handler function will be called.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/sansio/app.py"
+        ]
+    },
+    {
+        "context": [
+            "def test_client(self, use_cookies: bool = True, **kwargs: t.Any) -> FlaskClient:\n        \"\"\"Creates a test client for this application.  For information\n        about unit testing head over to :doc:`/testing`.\n\n        Note that if you are testing for assertions or exceptions in your\n        application code, you must set ``app.testing = True`` in order for the\n        exceptions to propagate to the test client.  Otherwise, the exception\n        will be handled by the application (not visible to the test client) and\n        the only indication of an AssertionError or other exception will be a\n        500 status code response to the test client.  See the :attr:`testing`\n        attribute.  For example::\n\n            app.testing = True\n            client = app.test_client()\n\n        The test client can be used in a ``with`` block to defer the closing down\n        of the context until the end of the ``with`` block.  This is useful if\n        you want to access the context locals for testing::\n\n            with app.test_client() as c:\n                rv = c.get('/?vodka=42')\n                assert request.args['vodka'] == '42'\n\n        Additionally, you may pass optional keyword arguments that will then\n        be passed to the application's :attr:`test_client_class` constructor.\n        For example::\n\n            from flask.testing import FlaskClient\n\n            class CustomClient(FlaskClient):\n                def __init__(self, *args, **kwargs):\n                    self._authentication = kwargs.pop(\"authentication\")\n                    super(CustomClient,self).__init__( *args, **kwargs)\n\n            app.test_client_class = CustomClient\n            client = app.test_client(authentication='Basic ....')\n\n        See :class:`~flask.testing.FlaskClient` for more information.\n\n        .. versionchanged:: 0.4\n           added support for ``with`` block usage for the client.\n\n        .. versionadded:: 0.7\n           The `use_cookies` parameter was added as well as the ability\n           to override the client to be used by setting the\n           :attr:`test_client_class` attribute.\n\n        .. versionchanged:: 0.11\n           Added `**kwargs` to support passing additional keyword arguments to\n           the constructor of :attr:`test_client_class`.\n        \"\"\"\n        cls = self.test_client_class\n        if cls is None:\n            from .testing import FlaskClient as cls\n        return cls(  # type: ignore\n            self, self.response_class, use_cookies=use_cookies, **kwargs\n        )"
+        ],
+        "question": "What does the `use_cookies` parameter do in the `test_client` method?\n",
+        "answer": "The `use_cookies` parameter determines whether cookies are used by the test client. If set to `True`, cookies will be used; otherwise, they will not be used.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/app.py"
+        ]
+    },
+    {
+        "context": [
+            "def test_send_from_directory(self, app, req_ctx):\n        app.root_path = os.path.join(\n            os.path.dirname(__file__), \"test_apps\", \"subdomaintestmodule\"\n        )\n        rv = flask.send_from_directory(\"static\", \"hello.txt\")\n        rv.direct_passthrough = False\n        assert rv.data.strip() == b\"Hello Subdomain\"\n        rv.close()"
+        ],
+        "question": "What is the expected content of the response sent by `flask.send_from_directory` in this test case?\n",
+        "answer": "The expected content of the response is b\"Hello Subdomain\".",
+        "source_doc": [
+            "/home/javier/Documents/flask/tests/test_helpers.py"
+        ]
+    },
+    {
+        "context": [
+            "def response(self, *args: t.Any, **kwargs: t.Any) -> Response:\n        \"\"\"Serialize the given arguments as JSON, and return a\n        :class:`~flask.Response` object with the ``application/json``\n        mimetype.\n\n        The :func:`~flask.json.jsonify` function calls this method for\n        the current application.\n\n        Either positional or keyword arguments can be given, not both.\n        If no arguments are given, ``None`` is serialized.\n\n        :param args: A single value to serialize, or multiple values to\n            treat as a list to serialize.\n        :param kwargs: Treat as a dict to serialize.\n        \"\"\"\n        obj = self._prepare_response_obj(args, kwargs)\n        return self._app.response_class(self.dumps(obj), mimetype=\"application/json\")"
+        ],
+        "question": "What will be serialized when no arguments are given?\n",
+        "answer": "None.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/json/provider.py"
+        ]
+    },
+    {
+        "context": [
+            "// Code for Global Scope\nfrom __future__ import annotations\nfrom http import HTTPStatus\nfrom werkzeug.exceptions import BadRequest\nfrom werkzeug.exceptions import NotFound\nfrom flask import Flask\napp = Flask(__name__)\n@app.errorhandler(400)\n@app.errorhandler(HTTPStatus.BAD_REQUEST)\n@app.errorhandler(BadRequest)\ndef handle_400(e: BadRequest) -> str:\n    return \"\"\n@app.errorhandler(ValueError)\ndef handle_custom(e: ValueError) -> str:\n    return \"\"\n@app.errorhandler(ValueError)\ndef handle_accept_base(e: Exception) -> str:\n    return \"\"\n@app.errorhandler(BadRequest)\n@app.errorhandler(404)\ndef handle_multiple(e: BadRequest | NotFound) -> str:\n    return \"\"\n"
+        ],
+        "question": "How many error handlers are defined for the 400 status code?\n",
+        "answer": "There are three error handlers defined for the 400 status code.",
+        "source_doc": [
+            "/home/javier/Documents/flask/tests/type_check/typing_error_handler.py"
+        ]
+    },
+    {
+        "context": [
+            "class NoAppException(click.UsageError):\n    \"\"\"Raised if an application cannot be found or loaded.\"\"\""
+        ],
+        "question": "What exception is raised when an application cannot be found or loaded?\n",
+        "answer": "A `NoAppException` is raised.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/cli.py"
+        ]
+    },
+    {
+        "context": [
+            "// Code for Global Scope\nimport pytest\nfrom js_example import app\n@pytest.fixture(name=\"app\")\ndef fixture_app():\n    app.testing = True\n    yield app\n    app.testing = False\n@pytest.fixture\ndef client(app):\n    return app.test_client()\n"
+        ],
+        "question": "What is the purpose of setting `app.testing` to `True` in the `fixture_app` function?\n",
+        "answer": "The purpose of setting `app.testing` to `True` in the `fixture_app` function is to enable testing mode for the Flask application, which allows the test client to be used without starting a real server.",
+        "source_doc": [
+            "/home/javier/Documents/flask/examples/javascript/tests/conftest.py"
+        ]
+    },
+    {
+        "context": [
+            "def redirect(self, location: str, code: int = 302) -> BaseResponse:\n        \"\"\"Create a redirect response object.\n\n        This is called by :func:`flask.redirect`, and can be called\n        directly as well.\n\n        :param location: The URL to redirect to.\n        :param code: The status code for the redirect.\n\n        .. versionadded:: 2.2\n            Moved from ``flask.redirect``, which calls this method.\n        \"\"\"\n        return _wz_redirect(\n            location,\n            code=code,\n            Response=self.response_class,  # type: ignore[arg-type]\n        )"
+        ],
+        "question": "What is the default status code used for redirects by the `redirect` function?\n",
+        "answer": "The default status code used for redirects by the `redirect` function is 302.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/sansio/app.py"
+        ]
+    },
+    {
+        "context": [
+            "// Code for Global Scope\nimport sqlite3\nfrom datetime import datetime\nimport click\nfrom flask import current_app\nfrom flask import g\n# Code for function: get_db()\n# Code for function: close_db(e=None)\n# Code for function: init_db()\n@click.command(\"init-db\")\ndef init_db_command():\n    \"\"\"Clear existing data and create new tables.\"\"\"\n    init_db()\n    click.echo(\"Initialized the database.\")\nsqlite3.register_converter(\"timestamp\", lambda v: datetime.fromisoformat(v.decode()))\n# Code for function: init_app(app)\n"
+        ],
+        "question": "What is the default timestamp format used by SQLite in this code?\n",
+        "answer": "The default timestamp format used by SQLite in this code is ISO 8601, as indicated by the `datetime.fromisoformat` converter.",
+        "source_doc": [
+            "/home/javier/Documents/flask/examples/tutorial/flaskr/db.py"
+        ]
+    },
+    {
+        "context": [
+            "class BlueprintError(Exception):\n    pass"
+        ],
+        "question": "What type of exception does Flask use for custom error handling?\n",
+        "answer": "The `BlueprintError` exception is a subclass of Python's built-in `Exception` class.",
+        "source_doc": [
+            "/home/javier/Documents/flask/tests/test_async.py"
+        ]
+    },
+    {
+        "context": [
+            "def redirect(self, location: str, code: int = 302) -> BaseResponse:\n        \"\"\"Create a redirect response object.\n\n        This is called by :func:`flask.redirect`, and can be called\n        directly as well.\n\n        :param location: The URL to redirect to.\n        :param code: The status code for the redirect.\n\n        .. versionadded:: 2.2\n            Moved from ``flask.redirect``, which calls this method.\n        \"\"\"\n        return _wz_redirect(\n            location,\n            code=code,\n            Response=self.response_class,  # type: ignore[arg-type]\n        )"
+        ],
+        "question": "What is the default status code used for redirects by the `redirect` function?\n",
+        "answer": "The default status code used for redirects by the `redirect` function is 302.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/sansio/app.py"
+        ]
+    },
+    {
+        "context": [
+            "def __delattr__(self, name: str) -> None:\n        try:\n            del self.__dict__[name]\n        except KeyError:\n            raise AttributeError(name) from None"
+        ],
+        "question": "What happens when an attribute that does not exist is deleted?\n",
+        "answer": "A KeyError is raised and then immediately converted to an AttributeError, which is then propagated.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/ctx.py"
+        ]
+    },
+    {
+        "context": [
+            "def dispatch_request(self) -> ft.ResponseReturnValue:\n        \"\"\"The actual view function behavior. Subclasses must override\n        this and return a valid response. Any variables from the URL\n        rule are passed as keyword arguments.\n        \"\"\"\n        raise NotImplementedError()"
+        ],
+        "question": "What is the expected return type of the `dispatch_request` method?\n\n",
+        "answer": "The `dispatch_request` method is expected to return a valid `ft.ResponseReturnValue`.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/views.py"
+        ]
+    },
+    {
+        "context": [
+            "def logout(self):\n        return self._client.get(\"/auth/logout\")"
+        ],
+        "question": "What HTTP request method does the `logout` function send to the server?\n\n",
+        "answer": "The `logout` function sends a GET request to the server.",
+        "source_doc": [
+            "/home/javier/Documents/flask/examples/tutorial/tests/conftest.py"
+        ]
+    },
+    {
+        "context": [
+            "// Code for Global Scope\nimport logging\nimport sys\nfrom io import StringIO\nimport pytest\nfrom flask.logging import default_handler\nfrom flask.logging import has_level_handler\nfrom flask.logging import wsgi_errors_stream\n@pytest.fixture(autouse=True)\ndef reset_logging(pytestconfig):\n    root_handlers = logging.root.handlers[:]\n    logging.root.handlers = []\n    root_level = logging.root.level\n\n    logger = logging.getLogger(\"flask_test\")\n    logger.handlers = []\n    logger.setLevel(logging.NOTSET)\n\n    logging_plugin = pytestconfig.pluginmanager.unregister(name=\"logging-plugin\")\n\n    yield\n\n    logging.root.handlers[:] = root_handlers\n    logging.root.setLevel(root_level)\n\n    logger.handlers = []\n    logger.setLevel(logging.NOTSET)\n\n    if logging_plugin:\n        pytestconfig.pluginmanager.register(logging_plugin, \"logging-plugin\")\n# Code for function: test_logger(app)\n# Code for function: test_logger_debug(app)\n# Code for function: test_existing_handler(app)\n# Code for function: test_wsgi_errors_stream(app, client, )\n# Code for function: test_has_level_handler()\n# Code for function: test_log_view_exception(app, client, )\n"
+        ],
+        "question": "What is the default logging handler used by Flask?\n",
+        "answer": "The default logging handler used by Flask is `default_handler`.",
+        "source_doc": [
+            "/home/javier/Documents/flask/tests/test_logging.py"
+        ]
+    },
+    {
+        "context": [
+            "def preprocess_request(self) -> ft.ResponseReturnValue | None:\n        \"\"\"Called before the request is dispatched. Calls\n        :attr:`url_value_preprocessors` registered with the app and the\n        current blueprint (if any). Then calls :attr:`before_request_funcs`\n        registered with the app and the blueprint.\n\n        If any :meth:`before_request` handler returns a non-None value, the\n        value is handled as if it was the return value from the view, and\n        further request handling is stopped.\n        \"\"\"\n        names = (None, *reversed(request.blueprints))\n\n        for name in names:\n            if name in self.url_value_preprocessors:\n                for url_func in self.url_value_preprocessors[name]:\n                    url_func(request.endpoint, request.view_args)\n\n        for name in names:\n            if name in self.before_request_funcs:\n                for before_func in self.before_request_funcs[name]:\n                    rv = self.ensure_sync(before_func)()\n\n                    if rv is not None:\n                        return rv  # type: ignore[no-any-return]\n\n        return None"
+        ],
+        "question": "How many times are the `before_request_funcs` registered with the app and the blueprint called?\n",
+        "answer": "The `before_request_funcs` registered with the app and the blueprint are called twice, once for each iteration of the loop that checks if the current name is in `self.before_request_funcs`.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/app.py"
+        ]
+    },
+    {
+        "context": [
+            "def dispatch_request(self) -> ft.ResponseReturnValue:\n        \"\"\"The actual view function behavior. Subclasses must override\n        this and return a valid response. Any variables from the URL\n        rule are passed as keyword arguments.\n        \"\"\"\n        raise NotImplementedError()"
+        ],
+        "question": "What is the expected return type of the `dispatch_request` method?\n\n",
+        "answer": "The `dispatch_request` method is expected to return a valid `ft.ResponseReturnValue`.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/views.py"
+        ]
+    },
+    {
+        "context": [
+            "def _load_form_data(self) -> None:\n        super()._load_form_data()\n\n        # In debug mode we're replacing the files multidict with an ad-hoc\n        # subclass that raises a different error for key errors.\n        if (\n            current_app\n            and current_app.debug\n            and self.mimetype != \"multipart/form-data\"\n            and not self.files\n        ):\n            from .debughelpers import attach_enctype_error_multidict\n\n            attach_enctype_error_multidict(self)"
+        ],
+        "question": "What is the condition for replacing the files multidict with an ad-hoc subclass in the `_load_form_data` method?\n\n",
+        "answer": "The condition is that `current_app` exists, `current_app.debug` is True, `self.mimetype` is not \"multipart/form-data\", and `self.files` is empty.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/wrappers.py"
+        ]
+    },
+    {
+        "context": [
+            "def handle_http_exception(\n        self, e: HTTPException\n    ) -> HTTPException | ft.ResponseReturnValue:\n        \"\"\"Handles an HTTP exception.  By default this will invoke the\n        registered error handlers and fall back to returning the\n        exception as response.\n\n        .. versionchanged:: 1.0.3\n            ``RoutingException``, used internally for actions such as\n             slash redirects during routing, is not passed to error\n             handlers.\n\n        .. versionchanged:: 1.0\n            Exceptions are looked up by code *and* by MRO, so\n            ``HTTPException`` subclasses can be handled with a catch-all\n            handler for the base ``HTTPException``.\n\n        .. versionadded:: 0.3\n        \"\"\"\n        # Proxy exceptions don't have error codes.  We want to always return\n        # those unchanged as errors\n        if e.code is None:\n            return e\n\n        # RoutingExceptions are used internally to trigger routing\n        # actions, such as slash redirects raising RequestRedirect. They\n        # are not raised or handled in user code.\n        if isinstance(e, RoutingException):\n            return e\n\n        handler = self._find_error_handler(e, request.blueprints)\n        if handler is None:\n            return e\n        return self.ensure_sync(handler)(e)  # type: ignore[no-any-return]"
+        ],
+        "question": "What types of exceptions are not passed to error handlers in Flask?\n",
+        "answer": "RoutingExceptions.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/app.py"
+        ]
+    },
+    {
+        "context": [
+            "class ScriptInfo:\n    \"\"\"Helper object to deal with Flask applications.  This is usually not\n    necessary to interface with as it's used internally in the dispatching\n    to click.  In future versions of Flask this object will most likely play\n    a bigger role.  Typically it's created automatically by the\n    :class:`FlaskGroup` but you can also manually create it and pass it\n    onwards as click object.\n\n    .. versionchanged:: 3.1\n        Added the ``load_dotenv_defaults`` parameter and attribute.\n    \"\"\"\n\n    # Code for function: ScriptInfo.__init__(self, app_import_path: str | None = None, create_app: t.Callable[..., Flask] | None = None, set_debug_flag: bool = True, load_dotenv_defaults: bool = True, )\n# Code for function: ScriptInfo.load_app(self)\n"
+        ],
+        "question": "What is the default value of the `load_dotenv_defaults` parameter in the `ScriptInfo.__init__` method?\n",
+        "answer": "The default value of the `load_dotenv_defaults` parameter is `True`.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/cli.py"
+        ]
+    },
+    {
+        "context": [
+            "def __fspath__(self):\n        return self.path"
+        ],
+        "question": "What does the `__fspath__` method return?\n",
+        "answer": "The `__fspath__` method returns a string representation of the object's path.",
+        "source_doc": [
+            "/home/javier/Documents/flask/tests/test_helpers.py"
+        ]
+    },
+    {
+        "context": [
+            "// Code for Global Scope\nimport os\nfrom flask import Flask\n# Code for function: create_app(test_config=None, )\n"
+        ],
+        "question": "What is the default configuration file used by the `create_app` function?\n",
+        "answer": "The default configuration file used by the `create_app` function is `os.environ.get('FLASK_CONFIG')`.",
+        "source_doc": [
+            "/home/javier/Documents/flask/examples/tutorial/flaskr/__init__.py"
+        ]
+    },
+    {
+        "context": [
+            "def loads(self, value: str) -> t.Any:\n        \"\"\"Load data from a JSON string and deserialized any tagged objects.\"\"\"\n        return self._untag_scan(loads(value))"
+        ],
+        "question": "What type of object does the `loads` function return?\n",
+        "answer": "The `loads` function returns an object of type `t.Any`.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/json/tag.py"
+        ]
+    },
+    {
+        "context": [
+            "def _merge_blueprint_funcs(self, app: App, name: str) -> None:\n        def extend(\n            bp_dict: dict[ft.AppOrBlueprintKey, list[t.Any]],\n            parent_dict: dict[ft.AppOrBlueprintKey, list[t.Any]],\n        ) -> None:\n            for key, values in bp_dict.items():\n                key = name if key is None else f\"{name}.{key}\"\n                parent_dict[key].extend(values)\n\n        for key, value in self.error_handler_spec.items():\n            key = name if key is None else f\"{name}.{key}\"\n            value = defaultdict(\n                dict,\n                {\n                    code: {exc_class: func for exc_class, func in code_values.items()}\n                    for code, code_values in value.items()\n                },\n            )\n            app.error_handler_spec[key] = value\n\n        for endpoint, func in self.view_functions.items():\n            app.view_functions[endpoint] = func\n\n        extend(self.before_request_funcs, app.before_request_funcs)\n        extend(self.after_request_funcs, app.after_request_funcs)\n        extend(\n            self.teardown_request_funcs,\n            app.teardown_request_funcs,\n        )\n        extend(self.url_default_functions, app.url_default_functions)\n        extend(self.url_value_preprocessors, app.url_value_preprocessors)\n        extend(self.template_context_processors, app.template_context_processors)"
+        ],
+        "question": "How many blueprint functions are merged into the Flask application in this method?\n\n",
+        "answer": "8. The `_merge_blueprint_funcs` method merges the following blueprint functions into the Flask application: error_handler_spec, view_functions, before_request_funcs, after_request_funcs, teardown_request_funcs, url_default_functions, url_value_preprocessors, and template_context_processors.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/sansio/blueprints.py"
+        ]
+    },
+    {
+        "context": [
+            "def test_host(self, runner):\n        app = Flask(__name__, static_folder=None, host_matching=True)\n        app.add_url_rule(\"/a\", host=\"a\", endpoint=\"a\")\n        app.add_url_rule(\"/b\", host=\"b\", endpoint=\"b\")\n        cli = FlaskGroup(create_app=lambda: app)\n        result = runner.invoke(cli, [\"routes\"])\n        assert result.exit_code == 0\n        assert \"Host\" in result.output"
+        ],
+        "question": "What is the expected exit code when running the CLI command `flask routes`?\n",
+        "answer": "The expected exit code is 0.",
+        "source_doc": [
+            "/home/javier/Documents/flask/tests/test_cli.py"
+        ]
+    },
+    {
+        "context": [
+            "class FixedOffset(datetime.tzinfo):\n    \"\"\"Fixed offset in hours east from UTC.\n\n    This is a slight adaptation of the ``FixedOffset`` example found in\n    https://docs.python.org/2.7/library/datetime.html.\n    \"\"\"\n\n    # Code for function: FixedOffset.__init__(self, hours, name)\n# Code for function: FixedOffset.utcoffset(self, dt)\n# Code for function: FixedOffset.tzname(self, dt)\n# Code for function: FixedOffset.dst(self, dt)\n"
+        ],
+        "question": "What is the purpose of the `FixedOffset` class?\n",
+        "answer": "The `FixedOffset` class represents a fixed offset in hours east from UTC.",
+        "source_doc": [
+            "/home/javier/Documents/flask/tests/test_json.py"
+        ]
+    },
+    {
+        "context": [
+            "// Code for Global Scope\nfrom __future__ import annotations\nimport collections.abc as c\nimport hashlib\nimport typing as t\nfrom collections.abc import MutableMapping\nfrom datetime import datetime\nfrom datetime import timezone\nfrom itsdangerous import BadSignature\nfrom itsdangerous import URLSafeTimedSerializer\nfrom werkzeug.datastructures import CallbackDict\nfrom .json.tag import TaggedJSONSerializer\nif t.TYPE_CHECKING:  # pragma: no cover\n    import typing_extensions as te\n\n    from .app import Flask\n    from .wrappers import Request\n    from .wrappers import Response\n# Code for class: SessionMixin()\n# Code for class: SecureCookieSession(self, initial: c.Mapping[str, t.Any] | c.Iterable[tuple[str, t.Any]] | None = None, , self: te.Self)\n# Code for function: SecureCookieSession.__init__(self, initial: c.Mapping[str, t.Any] | c.Iterable[tuple[str, t.Any]] | None = None, , self: te.Self)\n# Code for function: SecureCookieSession.__getitem__(self, key: str)\n# Code for function: SecureCookieSession.get(self, key: str, default: t.Any = None)\n# Code for function: SecureCookieSession.setdefault(self, key: str, default: t.Any = None)\n# Code for class: NullSession()\n# Code for function: NullSession._fail(self, *args: t.Any, **kwargs: t.Any)\n# Code for class: SessionInterface()\n# Code for function: SessionInterface.make_null_session(self, app: Flask)\n# Code for function: SessionInterface.is_null_session(self, obj: object)\n# Code for function: SessionInterface.get_cookie_name(self, app: Flask)\n# Code for function: SessionInterface.get_cookie_domain(self, app: Flask)\n# Code for function: SessionInterface.get_cookie_path(self, app: Flask)\n# Code for function: SessionInterface.get_cookie_httponly(self, app: Flask)\n# Code for function: SessionInterface.get_cookie_secure(self, app: Flask)\n# Code for function: SessionInterface.get_cookie_samesite(self, app: Flask)\n# Code for function: SessionInterface.get_cookie_partitioned(self, app: Flask)\n# Code for function: SessionInterface.get_expiration_time(self, app: Flask, session: SessionMixin)\n# Code for function: SessionInterface.should_set_cookie(self, app: Flask, session: SessionMixin)\n# Code for function: SessionInterface.open_session(self, app: Flask, request: Request)\n# Code for function: SessionInterface.save_session(self, app: Flask, session: SessionMixin, response: Response)\nsession_json_serializer = TaggedJSONSerializer()\n# Code for function: _lazy_sha1(string: bytes = b\"\")\n# Code for class: SecureCookieSessionInterface()\n# Code for function: SecureCookieSessionInterface.get_signing_serializer(self, app: Flask)\n# Code for function: SecureCookieSessionInterface.open_session(self, app: Flask, request: Request)\n# Code for function: SecureCookieSessionInterface.save_session(self, app: Flask, session: SessionMixin, response: Response)\n"
+        ],
+        "question": "What is the default hashing algorithm used by the `SecureCookieSession` class?\n",
+        "answer": "The default hashing algorithm used by the `SecureCookieSession` class is SHA-1.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/sessions.py"
+        ]
+    },
+    {
+        "context": [
+            "def make_default_options_response(self) -> Response:\n        \"\"\"This method is called to create the default ``OPTIONS`` response.\n        This can be changed through subclassing to change the default\n        behavior of ``OPTIONS`` responses.\n\n        .. versionadded:: 0.7\n        \"\"\"\n        adapter = request_ctx.url_adapter\n        methods = adapter.allowed_methods()  # type: ignore[union-attr]\n        rv = self.response_class()\n        rv.allow.update(methods)\n        return rv"
+        ],
+        "question": "What HTTP methods are allowed by default in the OPTIONS response?\n",
+        "answer": "The default allowed HTTP methods in the OPTIONS response are those returned by `adapter.allowed_methods()`, which is typically a list of all HTTP methods (e.g., GET, POST, PUT, DELETE, etc.) supported by the underlying web framework.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/app.py"
+        ]
+    },
+    {
+        "context": [
+            "def make_response(self, rv: ft.ResponseReturnValue) -> Response:\n        \"\"\"Convert the return value from a view function to an instance of\n        :attr:`response_class`.\n\n        :param rv: the return value from the view function. The view function\n            must return a response. Returning ``None``, or the view ending\n            without returning, is not allowed. The following types are allowed\n            for ``view_rv``:\n\n            ``str``\n                A response object is created with the string encoded to UTF-8\n                as the body.\n\n            ``bytes``\n                A response object is created with the bytes as the body.\n\n            ``dict``\n                A dictionary that will be jsonify'd before being returned.\n\n            ``list``\n                A list that will be jsonify'd before being returned.\n\n            ``generator`` or ``iterator``\n                A generator that returns ``str`` or ``bytes`` to be\n                streamed as the response.\n\n            ``tuple``\n                Either ``(body, status, headers)``, ``(body, status)``, or\n                ``(body, headers)``, where ``body`` is any of the other types\n                allowed here, ``status`` is a string or an integer, and\n                ``headers`` is a dictionary or a list of ``(key, value)``\n                tuples. If ``body`` is a :attr:`response_class` instance,\n                ``status`` overwrites the exiting value and ``headers`` are\n                extended.\n\n            :attr:`response_class`\n                The object is returned unchanged.\n\n            other :class:`~werkzeug.wrappers.Response` class\n                The object is coerced to :attr:`response_class`.\n\n            :func:`callable`\n                The function is called as a WSGI application. The result is\n                used to create a response object.\n\n        .. versionchanged:: 2.2\n            A generator will be converted to a streaming response.\n            A list will be converted to a JSON response.\n\n        .. versionchanged:: 1.1\n            A dict will be converted to a JSON response.\n\n        .. versionchanged:: 0.9\n           Previously a tuple was interpreted as the arguments for the\n           response object.\n        \"\"\"\n\n        status: int | None = None\n        headers: HeadersValue | None = None\n\n        # unpack tuple returns\n        if isinstance(rv, tuple):\n            len_rv = len(rv)\n\n            # a 3-tuple is unpacked directly\n            if len_rv == 3:\n                rv, status, headers = rv  # type: ignore[misc]\n            # decide if a 2-tuple has status or headers\n            elif len_rv == 2:\n                if isinstance(rv[1], (Headers, dict, tuple, list)):\n                    rv, headers = rv  # pyright: ignore\n                else:\n                    rv, status = rv  # type: ignore[assignment,misc]\n            # other sized tuples are not allowed\n            else:\n                raise TypeError(\n                    \"The view function did not return a valid response tuple.\"\n                    \" The tuple must have the form (body, status, headers),\"\n                    \" (body, status), or (body, headers).\"\n                )\n\n        # the body must not be None\n        if rv is None:\n            raise TypeError(\n                f\"The view function for {request.endpoint!r} did not\"\n                \" return a valid response. The function either returned\"\n                \" None or ended without a return statement.\"\n            )\n\n        # make sure the body is an instance of the response class\n        if not isinstance(rv, self.response_class):\n            if isinstance(rv, (str, bytes, bytearray)) or isinstance(rv, cabc.Iterator):\n                # let the response class set the status and headers instead of\n                # waiting to do it manually, so that the class can handle any\n                # special logic\n                rv = self.response_class(\n                    rv,\n                    status=status,\n                    headers=headers,  # type: ignore[arg-type]\n                )\n                status = headers = None\n            elif isinstance(rv, (dict, list)):\n                rv = self.json.response(rv)\n            elif isinstance(rv, BaseResponse) or callable(rv):\n                # evaluate a WSGI callable, or coerce a different response\n                # class to the correct type\n                try:\n                    rv = self.response_class.force_type(\n                        rv,  # type: ignore[arg-type]\n                        request.environ,\n                    )\n                except TypeError as e:\n                    raise TypeError(\n                        f\"{e}\\nThe view function did not return a valid\"\n                        \" response. The return type must be a string,\"\n                        \" dict, list, tuple with headers or status,\"\n                        \" Response instance, or WSGI callable, but it\"\n                        f\" was a {type(rv).__name__}.\"\n                    ).with_traceback(sys.exc_info()[2]) from None\n            else:\n                raise TypeError(\n                    \"The view function did not return a valid\"\n                    \" response. The return type must be a string,\"\n                    \" dict, list, tuple with headers or status,\"\n                    \" Response instance, or WSGI callable, but it was a\"\n                    f\" {type(rv).__name__}.\"\n                )\n\n        rv = t.cast(Response, rv)\n        # prefer the status if it was provided\n        if status is not None:\n            if isinstance(status, (str, bytes, bytearray)):\n                rv.status = status\n            else:\n                rv.status_code = status\n\n        # extend existing headers with provided headers\n        if headers:\n            rv.headers.update(headers)\n\n        return rv"
+        ],
+        "question": "What types of values are allowed for the return value from a view function in Flask?\n",
+        "answer": "The following types are allowed for the return value from a view function: str, bytes, dict, list, generator or iterator, tuple, Response class instance, and WSGI callable.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/app.py"
+        ]
+    },
+    {
+        "context": [
+            "class DispatchingJinjaLoader(BaseLoader):\n    \"\"\"A loader that looks for templates in the application and all\n    the blueprint folders.\n    \"\"\"\n\n    # Code for function: DispatchingJinjaLoader.__init__(self, app: App)\n# Code for function: DispatchingJinjaLoader.get_source(self, environment: BaseEnvironment, template: str)\n# Code for function: DispatchingJinjaLoader._get_source_explained(self, environment: BaseEnvironment, template: str)\n# Code for function: DispatchingJinjaLoader._get_source_fast(self, environment: BaseEnvironment, template: str)\n# Code for function: DispatchingJinjaLoader._iter_loaders(self, template: str)\n# Code for function: DispatchingJinjaLoader.list_templates(self)\n"
+        ],
+        "question": "How many directories does the DispatchingJinjaLoader look for templates in?\n",
+        "answer": "The DispatchingJinjaLoader looks for templates in the application directory and all blueprint folders.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/templating.py"
+        ]
+    },
+    {
+        "context": [
+            "def __repr__(self) -> str:\n        return (\n            f\"<{type(self).__name__} {self.request.url!r}\"\n            f\" [{self.request.method}] of {self.app.name}>\"\n        )"
+        ],
+        "question": "What is the purpose of the `__repr__` method in this code?\n",
+        "answer": "The `__repr__` method is used to provide a string representation of an object, which can be useful for debugging and logging purposes. In this specific case, it returns a string that includes the type of the object, the URL of the request, the HTTP method, and the name of the application.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/ctx.py"
+        ]
+    },
+    {
+        "context": [
+            "def __enter__(self) -> FlaskClient:\n        if self.preserve_context:\n            raise RuntimeError(\"Cannot nest client invocations\")\n        self.preserve_context = True\n        return self"
+        ],
+        "question": "What happens when you try to nest client invocations?\n",
+        "answer": "A `RuntimeError` is raised with the message \"Cannot nest client invocations\".",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/testing.py"
+        ]
+    },
+    {
+        "context": [
+            "def dispatch_request(self) -> ft.ResponseReturnValue:\n        \"\"\"Does the request dispatching.  Matches the URL and returns the\n        return value of the view or error handler.  This does not have to\n        be a response object.  In order to convert the return value to a\n        proper response object, call :func:`make_response`.\n\n        .. versionchanged:: 0.7\n           This no longer does the exception handling, this code was\n           moved to the new :meth:`full_dispatch_request`.\n        \"\"\"\n        req = request_ctx.request\n        if req.routing_exception is not None:\n            self.raise_routing_exception(req)\n        rule: Rule = req.url_rule  # type: ignore[assignment]\n        # if we provide automatic options for this URL and the\n        # request came with the OPTIONS method, reply automatically\n        if (\n            getattr(rule, \"provide_automatic_options\", False)\n            and req.method == \"OPTIONS\"\n        ):\n            return self.make_default_options_response()\n        # otherwise dispatch to the handler for that endpoint\n        view_args: dict[str, t.Any] = req.view_args  # type: ignore[assignment]\n        return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]"
+        ],
+        "question": "What happens when the request method is OPTIONS and the URL has automatic options provided?\n\n",
+        "answer": "The server will automatically reply with a default options response.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/app.py"
+        ]
+    },
+    {
+        "context": [
+            "def __init__(\n        self, name: str, get_converter: t.Callable[[t.Any], T] | None = None\n    ) -> None:\n        self.__name__ = name\n        self.get_converter = get_converter"
+        ],
+        "question": "What is the default value of the `get_converter` parameter in this function?\n",
+        "answer": "The default value of the `get_converter` parameter is `None`.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/config.py"
+        ]
+    },
+    {
+        "context": [
+            "def should_set_cookie(self, app: Flask, session: SessionMixin) -> bool:\n        \"\"\"Used by session backends to determine if a ``Set-Cookie`` header\n        should be set for this session cookie for this response. If the session\n        has been modified, the cookie is set. If the session is permanent and\n        the ``SESSION_REFRESH_EACH_REQUEST`` config is true, the cookie is\n        always set.\n\n        This check is usually skipped if the session was deleted.\n\n        .. versionadded:: 0.11\n        \"\"\"\n\n        return session.modified or (\n            session.permanent and app.config[\"SESSION_REFRESH_EACH_REQUEST\"]\n        )"
+        ],
+        "question": "What conditions must be met for a Set-Cookie header to be set for this session cookie?\n\n",
+        "answer": "The session has been modified, the session is permanent and SESSION_REFRESH_EACH_REQUEST config is true.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/sessions.py"
+        ]
+    },
+    {
+        "context": [
+            "def get_command(self, ctx: click.Context, name: str) -> click.Command | None:\n        self._load_plugin_commands()\n        # Look up built-in and plugin commands, which should be\n        # available even if the app fails to load.\n        rv = super().get_command(ctx, name)\n\n        if rv is not None:\n            return rv\n\n        info = ctx.ensure_object(ScriptInfo)\n\n        # Look up commands provided by the app, showing an error and\n        # continuing if the app couldn't be loaded.\n        try:\n            app = info.load_app()\n        except NoAppException as e:\n            click.secho(f\"Error: {e.format_message()}\\n\", err=True, fg=\"red\")\n            return None\n\n        # Push an app context for the loaded app unless it is already\n        # active somehow. This makes the context available to parameter\n        # and command callbacks without needing @with_appcontext.\n        if not current_app or current_app._get_current_object() is not app:  # type: ignore[attr-defined]\n            ctx.with_resource(app.app_context())\n\n        return app.cli.get_command(ctx, name)"
+        ],
+        "question": "What happens when the app fails to load in the `get_command` method?\n",
+        "answer": "If the app fails to load, an error message is printed and None is returned.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/cli.py"
+        ]
+    },
+    {
+        "context": [
+            "def untag(self, value: dict[str, t.Any]) -> t.Any:\n        \"\"\"Convert a tagged representation back to the original type.\"\"\"\n        if len(value) != 1:\n            return value\n\n        key = next(iter(value))\n\n        if key not in self.tags:\n            return value\n\n        return self.tags[key].to_python(value[key])"
+        ],
+        "question": "What is the condition for returning the original input value in the `untag` method?\n",
+        "answer": "The original input value is returned when the length of the input dictionary is not equal to 1.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/json/tag.py"
+        ]
+    },
+    {
+        "context": [
+            "// Code for Global Scope\nimport logging\nimport pytest\nimport werkzeug.serving\nfrom jinja2 import TemplateNotFound\nfrom markupsafe import Markup\nimport flask\n# Code for function: test_context_processing(app, client, , )\n# Code for function: test_original_win(app, client, )\n# Code for function: test_simple_stream(app, client, )\n# Code for function: test_request_less_rendering(app, app_ctx, )\n# Code for function: test_standard_context(app, client, )\n# Code for function: test_escaping(app, client, )\n# Code for function: test_no_escaping(app, client, )\n# Code for function: test_escaping_without_template_filename(app, client, req_ctx)\n# Code for function: test_macros(app, req_ctx)\n# Code for function: test_template_filter(app, s)\n# Code for function: test_add_template_filter(app, s)\n# Code for function: test_template_filter_with_name(app, s)\n# Code for function: test_add_template_filter_with_name(app, s)\n# Code for function: test_template_filter_with_template(app, client, , s)\n# Code for function: test_add_template_filter_with_template(app, client, s, )\n# Code for function: test_template_filter_with_name_and_template(app, client, , s)\n# Code for function: test_add_template_filter_with_name_and_template(app, client, s, )\n# Code for function: test_template_test(app, value)\n# Code for function: test_add_template_test(app, value)\n# Code for function: test_template_test_with_name(app, value)\n# Code for function: test_add_template_test_with_name(app, value)\n# Code for function: test_template_test_with_template(app, client, value, )\n# Code for function: test_add_template_test_with_template(app, client, , value)\n# Code for function: test_template_test_with_name_and_template(app, client, , value)\n# Code for function: test_add_template_test_with_name_and_template(app, client, value, )\n# Code for function: test_add_template_global(app, app_ctx, )\n# Code for function: test_custom_template_loader(client, , self)\n# Code for function: test_iterable_loader(app, client, , )\n# Code for function: test_templates_auto_reload(app)\n# Code for function: test_templates_auto_reload_debug_run(app, monkeypatch, *args, **kwargs)\n# Code for function: test_template_loader_debugging(test_apps, monkeypatch, self, record)\n# Code for function: test_custom_jinja_env()\n"
+        ],
+        "question": "What is the purpose of the `test_templates_auto_reload` function?\n",
+        "answer": "The `test_templates_auto_reload` function tests whether templates are automatically reloaded when they change.",
+        "source_doc": [
+            "/home/javier/Documents/flask/tests/test_templating.py"
+        ]
+    },
+    {
+        "context": [
+            "def __init__(\n        self,\n        import_name: str,\n        static_url_path: str | None = None,\n        static_folder: str | os.PathLike[str] | None = \"static\",\n        static_host: str | None = None,\n        host_matching: bool = False,\n        subdomain_matching: bool = False,\n        template_folder: str | os.PathLike[str] | None = \"templates\",\n        instance_path: str | None = None,\n        instance_relative_config: bool = False,\n        root_path: str | None = None,\n    ) -> None:\n        super().__init__(\n            import_name=import_name,\n            static_folder=static_folder,\n            static_url_path=static_url_path,\n            template_folder=template_folder,\n            root_path=root_path,\n        )\n\n        if instance_path is None:\n            instance_path = self.auto_find_instance_path()\n        elif not os.path.isabs(instance_path):\n            raise ValueError(\n                \"If an instance path is provided it must be absolute.\"\n                \" A relative path was given instead.\"\n            )\n\n        #: Holds the path to the instance folder.\n        #:\n        #: .. versionadded:: 0.8\n        self.instance_path = instance_path\n\n        #: The configuration dictionary as :class:`Config`.  This behaves\n        #: exactly like a regular dictionary but supports additional methods\n        #: to load a config from files.\n        self.config = self.make_config(instance_relative_config)\n\n        #: An instance of :attr:`aborter_class` created by\n        #: :meth:`make_aborter`. This is called by :func:`flask.abort`\n        #: to raise HTTP errors, and can be called directly as well.\n        #:\n        #: .. versionadded:: 2.2\n        #:     Moved from ``flask.abort``, which calls this object.\n        self.aborter = self.make_aborter()\n\n        self.json: JSONProvider = self.json_provider_class(self)\n        \"\"\"Provides access to JSON methods. Functions in ``flask.json``\n        will call methods on this provider when the application context\n        is active. Used for handling JSON requests and responses.\n\n        An instance of :attr:`json_provider_class`. Can be customized by\n        changing that attribute on a subclass, or by assigning to this\n        attribute afterwards.\n\n        The default, :class:`~flask.json.provider.DefaultJSONProvider`,\n        uses Python's built-in :mod:`json` library. A different provider\n        can use a different JSON library.\n\n        .. versionadded:: 2.2\n        \"\"\"\n\n        #: A list of functions that are called by\n        #: :meth:`handle_url_build_error` when :meth:`.url_for` raises a\n        #: :exc:`~werkzeug.routing.BuildError`. Each function is called\n        #: with ``error``, ``endpoint`` and ``values``. If a function\n        #: returns ``None`` or raises a ``BuildError``, it is skipped.\n        #: Otherwise, its return value is returned by ``url_for``.\n        #:\n        #: .. versionadded:: 0.9\n        self.url_build_error_handlers: list[\n            t.Callable[[Exception, str, dict[str, t.Any]], str]\n        ] = []\n\n        #: A list of functions that are called when the application context\n        #: is destroyed.  Since the application context is also torn down\n        #: if the request ends this is the place to store code that disconnects\n        #: from databases.\n        #:\n        #: .. versionadded:: 0.9\n        self.teardown_appcontext_funcs: list[ft.TeardownCallable] = []\n\n        #: A list of shell context processor functions that should be run\n        #: when a shell context is created.\n        #:\n        #: .. versionadded:: 0.11\n        self.shell_context_processors: list[ft.ShellContextProcessorCallable] = []\n\n        #: Maps registered blueprint names to blueprint objects. The\n        #: dict retains the order the blueprints were registered in.\n        #: Blueprints can be registered multiple times, this dict does\n        #: not track how often they were attached.\n        #:\n        #: .. versionadded:: 0.7\n        self.blueprints: dict[str, Blueprint] = {}\n\n        #: a place where extensions can store application specific state.  For\n        #: example this is where an extension could store database engines and\n        #: similar things.\n        #:\n        #: The key must match the name of the extension module. For example in\n        #: case of a \"Flask-Foo\" extension in `flask_foo`, the key would be\n        #: ``'foo'``.\n        #:\n        #: .. versionadded:: 0.7\n        self.extensions: dict[str, t.Any] = {}\n\n        #: The :class:`~werkzeug.routing.Map` for this instance.  You can use\n        #: this to change the routing converters after the class was created\n        #: but before any routes are connected.  Example::\n        #:\n        #:    from werkzeug.routing import BaseConverter\n        #:\n        #:    class ListConverter(BaseConverter):\n        #:        def to_python(self, value):\n        #:            return value.split(',')\n        #:        def to_url(self, values):\n        #:            return ','.join(super(ListConverter, self).to_url(value)\n        #:                            for value in values)\n        #:\n        #:    app = Flask(__name__)\n        #:    app.url_map.converters['list'] = ListConverter\n        self.url_map = self.url_map_class(host_matching=host_matching)\n\n        self.subdomain_matching = subdomain_matching\n\n        # tracks internally if the application already handled at least one\n        # request.\n        self._got_first_request = False"
+        ],
+        "question": "What is the default value of the `static_folder` parameter in the Flask app instance?\n\n",
+        "answer": "The default value of the `static_folder` parameter is `\"static\"`.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/sansio/app.py"
+        ]
+    },
+    {
+        "context": [
+            "def open_resource(\n        self, resource: str, mode: str = \"rb\", encoding: str | None = None\n    ) -> t.IO[t.AnyStr]:\n        \"\"\"Open a resource file relative to :attr:`root_path` for reading.\n\n        For example, if the file ``schema.sql`` is next to the file\n        ``app.py`` where the ``Flask`` app is defined, it can be opened\n        with:\n\n        .. code-block:: python\n\n            with app.open_resource(\"schema.sql\") as f:\n                conn.executescript(f.read())\n\n        :param resource: Path to the resource relative to :attr:`root_path`.\n        :param mode: Open the file in this mode. Only reading is supported,\n            valid values are ``\"r\"`` (or ``\"rt\"``) and ``\"rb\"``.\n        :param encoding: Open the file with this encoding when opening in text\n            mode. This is ignored when opening in binary mode.\n\n        .. versionchanged:: 3.1\n            Added the ``encoding`` parameter.\n        \"\"\"\n        if mode not in {\"r\", \"rt\", \"rb\"}:\n            raise ValueError(\"Resources can only be opened for reading.\")\n\n        path = os.path.join(self.root_path, resource)\n\n        if mode == \"rb\":\n            return open(path, mode)  # pyright: ignore\n\n        return open(path, mode, encoding=encoding)"
+        ],
+        "question": "What are the valid modes for opening a resource file using the `open_resource` method?\n",
+        "answer": "The valid modes for opening a resource file are \"r\", \"rt\", and \"rb\".",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/app.py"
+        ]
+    },
+    {
+        "context": [
+            "def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:\n        super().__init__(*args, **kwargs)\n        self.preserve_context = False\n        self._new_contexts: list[t.ContextManager[t.Any]] = []\n        self._context_stack = ExitStack()\n        self.environ_base = {\n            \"REMOTE_ADDR\": \"127.0.0.1\",\n            \"HTTP_USER_AGENT\": f\"Werkzeug/{_get_werkzeug_version()}\",\n        }"
+        ],
+        "question": "What is the default value of `self.preserve_context` in this class?\n",
+        "answer": "The default value of `self.preserve_context` is `False`.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/testing.py"
+        ]
+    },
+    {
+        "context": [
+            "def to_json(self, value: t.Any) -> t.Any:\n        # JSON objects may only have string keys, so don't bother tagging the\n        # key here.\n        return {k: self.serializer.tag(v) for k, v in value.items()}"
+        ],
+        "question": "What data structure does the `to_json` function return?\n",
+        "answer": "A dictionary.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/json/tag.py"
+        ]
+    },
+    {
+        "context": [
+            "class TagTuple(JSONTag):\n    __slots__ = ()\n    key = \" t\"\n\n    # Code for function: TagTuple.check(self, value: t.Any)\n# Code for function: TagTuple.to_json(self, value: t.Any)\n# Code for function: TagTuple.to_python(self, value: t.Any)\n"
+        ],
+        "question": "What is the key used by the TagTuple class?\n",
+        "answer": "The key used by the TagTuple class is \"t\".",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/json/tag.py"
+        ]
+    },
+    {
+        "context": [
+            "def from_pyfile(\n        self, filename: str | os.PathLike[str], silent: bool = False\n    ) -> bool:\n        \"\"\"Updates the values in the config from a Python file.  This function\n        behaves as if the file was imported as module with the\n        :meth:`from_object` function.\n\n        :param filename: the filename of the config.  This can either be an\n                         absolute filename or a filename relative to the\n                         root path.\n        :param silent: set to ``True`` if you want silent failure for missing\n                       files.\n        :return: ``True`` if the file was loaded successfully.\n\n        .. versionadded:: 0.7\n           `silent` parameter.\n        \"\"\"\n        filename = os.path.join(self.root_path, filename)\n        d = types.ModuleType(\"config\")\n        d.__file__ = filename\n        try:\n            with open(filename, mode=\"rb\") as config_file:\n                exec(compile(config_file.read(), filename, \"exec\"), d.__dict__)\n        except OSError as e:\n            if silent and e.errno in (errno.ENOENT, errno.EISDIR, errno.ENOTDIR):\n                return False\n            e.strerror = f\"Unable to load configuration file ({e.strerror})\"\n            raise\n        self.from_object(d)\n        return True"
+        ],
+        "question": "What is the default behavior when a config file is missing and silent failure is enabled?\n\n",
+        "answer": "The function will silently fail and return False.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/config.py"
+        ]
+    },
+    {
+        "context": [
+            "def invoke(  # type: ignore\n        self, cli: t.Any = None, args: t.Any = None, **kwargs: t.Any\n    ) -> Result:\n        \"\"\"Invokes a CLI command in an isolated environment. See\n        :meth:`CliRunner.invoke <click.testing.CliRunner.invoke>` for\n        full method documentation. See :ref:`testing-cli` for examples.\n\n        If the ``obj`` argument is not given, passes an instance of\n        :class:`~flask.cli.ScriptInfo` that knows how to load the Flask\n        app being tested.\n\n        :param cli: Command object to invoke. Default is the app's\n            :attr:`~flask.app.Flask.cli` group.\n        :param args: List of strings to invoke the command with.\n\n        :return: a :class:`~click.testing.Result` object.\n        \"\"\"\n        if cli is None:\n            cli = self.app.cli\n\n        if \"obj\" not in kwargs:\n            kwargs[\"obj\"] = ScriptInfo(create_app=lambda: self.app)\n\n        return super().invoke(cli, args, **kwargs)"
+        ],
+        "question": "What does the `invoke` method do when no `cli` argument is provided?\n",
+        "answer": "The `invoke` method uses the app's `cli` group as the command object to invoke.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/testing.py"
+        ]
+    },
+    {
+        "context": [
+            "class TagTuple(JSONTag):\n    __slots__ = ()\n    key = \" t\"\n\n    # Code for function: TagTuple.check(self, value: t.Any)\n# Code for function: TagTuple.to_json(self, value: t.Any)\n# Code for function: TagTuple.to_python(self, value: t.Any)\n"
+        ],
+        "question": "What is the key used by the TagTuple class?\n",
+        "answer": "The key used by the TagTuple class is \"t\".",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/json/tag.py"
+        ]
+    },
+    {
+        "context": [
+            "def __iter__(self) -> t.Iterator[str]:\n        return iter(self.__dict__)"
+        ],
+        "question": "What type of iterator does the `__iter__` method return?\n",
+        "answer": "The `__iter__` method returns an iterator over strings.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/ctx.py"
+        ]
+    },
+    {
+        "context": [
+            "def check(self, value: t.Any) -> bool:\n        \"\"\"Check if the given value should be tagged by this tag.\"\"\"\n        raise NotImplementedError"
+        ],
+        "question": "What is the purpose of the `check` method in a class?\n",
+        "answer": "The `check` method is used to determine whether a given value should be tagged by a specific tag, and it raises a `NotImplementedError` because its implementation is not provided.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/json/tag.py"
+        ]
+    },
+    {
+        "context": [
+            "// Code for Global Scope\nfrom io import StringIO\nimport flask\n# Code for function: test_suppressed_exception_logging(, , self, exc_info)\n"
+        ],
+        "question": "What type of object does Flask return when creating a new application instance?\n",
+        "answer": "A `flask.Flask` object.",
+        "source_doc": [
+            "/home/javier/Documents/flask/tests/test_subclassing.py"
+        ]
+    },
+    {
+        "context": [
+            "def push(self) -> None:\n        \"\"\"Binds the app context to the current context.\"\"\"\n        self._cv_tokens.append(_cv_app.set(self))\n        appcontext_pushed.send(self.app, _async_wrapper=self.app.ensure_sync)"
+        ],
+        "question": "What is the purpose of calling `appcontext_pushed.send` in this method?\n\n",
+        "answer": "The purpose of calling `appcontext_pushed.send` is to send a signal that the application context has been pushed, allowing any registered event handlers to execute.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/ctx.py"
+        ]
+    },
+    {
+        "context": [
+            "// Code for Global Scope\nfrom celery.result import AsyncResult\nfrom flask import Blueprint\nfrom flask import request\nfrom . import tasks\nbp = Blueprint(\"tasks\", __name__, url_prefix=\"/tasks\")\n@bp.get(\"/result/<id>\")\ndef result(id: str) -> dict[str, object]:\n    result = AsyncResult(id)\n    ready = result.ready()\n    return {\n        \"ready\": ready,\n        \"successful\": result.successful() if ready else None,\n        \"value\": result.get() if ready else result.result,\n    }\n@bp.post(\"/add\")\ndef add() -> dict[str, object]:\n    a = request.form.get(\"a\", type=int)\n    b = request.form.get(\"b\", type=int)\n    result = tasks.add.delay(a, b)\n    return {\"result_id\": result.id}\n@bp.post(\"/block\")\ndef block() -> dict[str, object]:\n    result = tasks.block.delay()\n    return {\"result_id\": result.id}\n@bp.post(\"/process\")\ndef process() -> dict[str, object]:\n    result = tasks.process.delay(total=request.form.get(\"total\", type=int))\n    return {\"result_id\": result.id}\n"
+        ],
+        "question": "What is the purpose of the `AsyncResult` class in this code?\n",
+        "answer": "The `AsyncResult` class is used to retrieve and check the status of a Celery task by its ID.",
+        "source_doc": [
+            "/home/javier/Documents/flask/examples/celery/src/task_app/views.py"
+        ]
+    },
+    {
+        "context": [
+            "class Request(RequestBase):\n    \"\"\"The request object used by default in Flask.  Remembers the\n    matched endpoint and view arguments.\n\n    It is what ends up as :class:`~flask.request`.  If you want to replace\n    the request object used you can subclass this and set\n    :attr:`~flask.Flask.request_class` to your subclass.\n\n    The request object is a :class:`~werkzeug.wrappers.Request` subclass and\n    provides all of the attributes Werkzeug defines plus a few Flask\n    specific ones.\n    \"\"\"\n\n    json_module: t.Any = json\n\n    #: The internal URL rule that matched the request.  This can be\n    #: useful to inspect which methods are allowed for the URL from\n    #: a before/after handler (``request.url_rule.methods``) etc.\n    #: Though if the request's method was invalid for the URL rule,\n    #: the valid list is available in ``routing_exception.valid_methods``\n    #: instead (an attribute of the Werkzeug exception\n    #: :exc:`~werkzeug.exceptions.MethodNotAllowed`)\n    #: because the request was never internally bound.\n    #:\n    #: .. versionadded:: 0.6\n    url_rule: Rule | None = None\n\n    #: A dict of view arguments that matched the request.  If an exception\n    #: happened when matching, this will be ``None``.\n    view_args: dict[str, t.Any] | None = None\n\n    #: If matching the URL failed, this is the exception that will be\n    #: raised / was raised as part of the request handling.  This is\n    #: usually a :exc:`~werkzeug.exceptions.NotFound` exception or\n    #: something similar.\n    routing_exception: HTTPException | None = None\n\n    _max_content_length: int | None = None\n    _max_form_memory_size: int | None = None\n    _max_form_parts: int | None = None\n\n    @property\n    def max_content_length(self) -> int | None:\n        \"\"\"The maximum number of bytes that will be read during this request. If\n        this limit is exceeded, a 413 :exc:`~werkzeug.exceptions.RequestEntityTooLarge`\n        error is raised. If it is set to ``None``, no limit is enforced at the\n        Flask application level. However, if it is ``None`` and the request has\n        no ``Content-Length`` header and the WSGI server does not indicate that\n        it terminates the stream, then no data is read to avoid an infinite\n        stream.\n\n        Each request defaults to the :data:`MAX_CONTENT_LENGTH` config, which\n        defaults to ``None``. It can be set on a specific ``request`` to apply\n        the limit to that specific view. This should be set appropriately based\n        on an application's or view's specific needs.\n\n        .. versionchanged:: 3.1\n            This can be set per-request.\n\n        .. versionchanged:: 0.6\n            This is configurable through Flask config.\n        \"\"\"\n        if self._max_content_length is not None:\n            return self._max_content_length\n\n        if not current_app:\n            return super().max_content_length\n\n        return current_app.config[\"MAX_CONTENT_LENGTH\"]  # type: ignore[no-any-return]\n\n    @max_content_length.setter\n    def max_content_length(self, value: int | None) -> None:\n        self._max_content_length = value\n\n    @property\n    def max_form_memory_size(self) -> int | None:\n        \"\"\"The maximum size in bytes any non-file form field may be in a\n        ``multipart/form-data`` body. If this limit is exceeded, a 413\n        :exc:`~werkzeug.exceptions.RequestEntityTooLarge` error is raised. If it\n        is set to ``None``, no limit is enforced at the Flask application level.\n\n        Each request defaults to the :data:`MAX_FORM_MEMORY_SIZE` config, which\n        defaults to ``500_000``. It can be set on a specific ``request`` to\n        apply the limit to that specific view. This should be set appropriately\n        based on an application's or view's specific needs.\n\n        .. versionchanged:: 3.1\n            This is configurable through Flask config.\n        \"\"\"\n        if self._max_form_memory_size is not None:\n            return self._max_form_memory_size\n\n        if not current_app:\n            return super().max_form_memory_size\n\n        return current_app.config[\"MAX_FORM_MEMORY_SIZE\"]  # type: ignore[no-any-return]\n\n    @max_form_memory_size.setter\n    def max_form_memory_size(self, value: int | None) -> None:\n        self._max_form_memory_size = value\n\n    @property  # type: ignore[override]\n    def max_form_parts(self) -> int | None:\n        \"\"\"The maximum number of fields that may be present in a\n        ``multipart/form-data`` body. If this limit is exceeded, a 413\n        :exc:`~werkzeug.exceptions.RequestEntityTooLarge` error is raised. If it\n        is set to ``None``, no limit is enforced at the Flask application level.\n\n        Each request defaults to the :data:`MAX_FORM_PARTS` config, which\n        defaults to ``1_000``. It can be set on a specific ``request`` to apply\n        the limit to that specific view. This should be set appropriately based\n        on an application's or view's specific needs.\n\n        .. versionchanged:: 3.1\n            This is configurable through Flask config.\n        \"\"\"\n        if self._max_form_parts is not None:\n            return self._max_form_parts\n\n        if not current_app:\n            return super().max_form_parts\n\n        return current_app.config[\"MAX_FORM_PARTS\"]  # type: ignore[no-any-return]\n\n    @max_form_parts.setter\n    def max_form_parts(self, value: int | None) -> None:\n        self._max_form_parts = value\n\n    @property\n    def endpoint(self) -> str | None:\n        \"\"\"The endpoint that matched the request URL.\n\n        This will be ``None`` if matching failed or has not been\n        performed yet.\n\n        This in combination with :attr:`view_args` can be used to\n        reconstruct the same URL or a modified URL.\n        \"\"\"\n        if self.url_rule is not None:\n            return self.url_rule.endpoint  # type: ignore[no-any-return]\n\n        return None\n\n    @property\n    def blueprint(self) -> str | None:\n        \"\"\"The registered name of the current blueprint.\n\n        This will be ``None`` if the endpoint is not part of a\n        blueprint, or if URL matching failed or has not been performed\n        yet.\n\n        This does not necessarily match the name the blueprint was\n        created with. It may have been nested, or registered with a\n        different name.\n        \"\"\"\n        endpoint = self.endpoint\n\n        if endpoint is not None and \".\" in endpoint:\n            return endpoint.rpartition(\".\")[0]\n\n        return None\n\n    @property\n    def blueprints(self) -> list[str]:\n        \"\"\"The registered names of the current blueprint upwards through\n        parent blueprints.\n\n        This will be an empty list if there is no current blueprint, or\n        if URL matching failed.\n\n        .. versionadded:: 2.0.1\n        \"\"\"\n        name = self.blueprint\n\n        if name is None:\n            return []\n\n        return _split_blueprint_path(name)\n\n    # Code for function: Request._load_form_data(self)\n# Code for function: Request.on_json_loading_failed(self, e: ValueError | None)\n"
+        ],
+        "question": "What is the maximum number of bytes that will be read during a request by default in Flask?\n",
+        "answer": "The maximum number of bytes that will be read during a request by default in Flask is None.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/wrappers.py"
+        ]
+    },
+    {
+        "context": [
+            "def _prepare_response_obj(\n        self, args: tuple[t.Any, ...], kwargs: dict[str, t.Any]\n    ) -> t.Any:\n        if args and kwargs:\n            raise TypeError(\"app.json.response() takes either args or kwargs, not both\")\n\n        if not args and not kwargs:\n            return None\n\n        if len(args) == 1:\n            return args[0]\n\n        return args or kwargs"
+        ],
+        "question": "What happens when the function _prepare_response_obj is called with both arguments and keyword arguments?\n",
+        "answer": "A TypeError will be raised, indicating that the function can only take either positional arguments or keyword arguments, but not both.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/json/provider.py"
+        ]
+    },
+    {
+        "context": [
+            "def __getattr__(self, name):\n        return getattr(self._io, name)"
+        ],
+        "question": "What happens when a non-existent attribute is accessed on an instance of this class?\n\n",
+        "answer": "The `__getattr__` method will be called to handle the access, and it will delegate the attribute lookup to the `_io` object.",
+        "source_doc": [
+            "/home/javier/Documents/flask/tests/test_helpers.py"
+        ]
+    },
+    {
+        "context": [
+            "def __exit__(\n        self,\n        exc_type: type | None,\n        exc_value: BaseException | None,\n        tb: TracebackType | None,\n    ) -> None:\n        self.preserve_context = False\n        self._context_stack.close()"
+        ],
+        "question": "What happens to the context stack when an exception is raised in a with statement?\n\n",
+        "answer": "The context stack is closed.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/testing.py"
+        ]
+    },
+    {
+        "context": [
+            "class DefaultJSONProvider(JSONProvider):\n    \"\"\"Provide JSON operations using Python's built-in :mod:`json`\n    library. Serializes the following additional data types:\n\n    -   :class:`datetime.datetime` and :class:`datetime.date` are\n        serialized to :rfc:`822` strings. This is the same as the HTTP\n        date format.\n    -   :class:`uuid.UUID` is serialized to a string.\n    -   :class:`dataclasses.dataclass` is passed to\n        :func:`dataclasses.asdict`.\n    -   :class:`~markupsafe.Markup` (or any object with a ``__html__``\n        method) will call the ``__html__`` method to get a string.\n    \"\"\"\n\n    default: t.Callable[[t.Any], t.Any] = staticmethod(_default)  # type: ignore[assignment]\n    \"\"\"Apply this function to any object that :meth:`json.dumps` does\n    not know how to serialize. It should return a valid JSON type or\n    raise a ``TypeError``.\n    \"\"\"\n\n    ensure_ascii = True\n    \"\"\"Replace non-ASCII characters with escape sequences. This may be\n    more compatible with some clients, but can be disabled for better\n    performance and size.\n    \"\"\"\n\n    sort_keys = True\n    \"\"\"Sort the keys in any serialized dicts. This may be useful for\n    some caching situations, but can be disabled for better performance.\n    When enabled, keys must all be strings, they are not converted\n    before sorting.\n    \"\"\"\n\n    compact: bool | None = None\n    \"\"\"If ``True``, or ``None`` out of debug mode, the :meth:`response`\n    output will not add indentation, newlines, or spaces. If ``False``,\n    or ``None`` in debug mode, it will use a non-compact representation.\n    \"\"\"\n\n    mimetype = \"application/json\"\n    \"\"\"The mimetype set in :meth:`response`.\"\"\"\n\n    # Code for function: DefaultJSONProvider.dumps(self, obj: t.Any, **kwargs: t.Any)\n# Code for function: DefaultJSONProvider.loads(self, s: str | bytes, **kwargs: t.Any)\n# Code for function: DefaultJSONProvider.response(self, *args: t.Any, **kwargs: t.Any)\n"
+        ],
+        "question": "What additional data types does the DefaultJSONProvider serialize?\n",
+        "answer": "The DefaultJSONProvider serializes datetime.datetime and datetime.date to RFC 822 strings, uuid.UUID to a string, dataclasses.dataclass using dataclasses.asdict, and Markup (or any object with a __html__ method) by calling its __html__ method.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/json/provider.py"
+        ]
+    },
+    {
+        "context": [
+            "def test_streaming_with_context_as_decorator(self, app, client):\n        @app.route(\"/\")\n        def index():\n            @flask.stream_with_context\n            def generate(hello):\n                yield hello\n                yield flask.request.args[\"name\"]\n                yield \"!\"\n\n            return flask.Response(generate(\"Hello \"))\n\n        rv = client.get(\"/?name=World\")\n        assert rv.data == b\"Hello World!\""
+        ],
+        "question": "What is the expected output of the `generate` function when called with the argument `\"Hello \"`?\n\n",
+        "answer": "The `generate` function will yield the string `\"Hello \"`, followed by the value of the `name` query parameter (which is `\"World\"`), and finally the string `\"!\"`. Therefore, the expected output is the bytes object `b\"Hello World!\"`.",
+        "source_doc": [
+            "/home/javier/Documents/flask/tests/test_helpers.py"
+        ]
+    },
+    {
+        "context": [
+            "def to_python(self, value: t.Any) -> t.Any:\n        return UUID(value)"
+        ],
+        "question": "What type of object does the `to_python` method return for a given input?\n",
+        "answer": "The `to_python` method returns a `UUID` object.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/json/tag.py"
+        ]
+    },
+    {
+        "context": [
+            "def __init__(self, client):\n        self._client = client"
+        ],
+        "question": "What parameter does the class constructor take?\n",
+        "answer": "The client parameter.",
+        "source_doc": [
+            "/home/javier/Documents/flask/examples/tutorial/tests/conftest.py"
+        ]
+    },
+    {
+        "context": [
+            "def __init__(self, app: App, **options: t.Any) -> None:\n        if \"loader\" not in options:\n            options[\"loader\"] = app.create_global_jinja_loader()\n        BaseEnvironment.__init__(self, **options)\n        self.app = app"
+        ],
+        "question": "What is the default value of the 'loader' option when creating a new instance?\n",
+        "answer": "The default value of the 'loader' option is an instance created by calling `app.create_global_jinja_loader()`.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/templating.py"
+        ]
+    },
+    {
+        "context": [
+            "def test_send_file(self, app, req_ctx):\n        rv = flask.send_file(\"static/index.html\")\n        assert rv.direct_passthrough\n        assert rv.mimetype == \"text/html\"\n\n        with app.open_resource(\"static/index.html\") as f:\n            rv.direct_passthrough = False\n            assert rv.data == f.read()\n\n        rv.close()"
+        ],
+        "question": "What is the default behavior of `flask.send_file()` when sending a file?\n",
+        "answer": "The default behavior of `flask.send_file()` sends the file with direct passthrough enabled, which means Flask will not buffer the response.",
+        "source_doc": [
+            "/home/javier/Documents/flask/tests/test_helpers.py"
+        ]
+    },
+    {
+        "context": [
+            "def push(self) -> None:\n        \"\"\"Binds the app context to the current context.\"\"\"\n        self._cv_tokens.append(_cv_app.set(self))\n        appcontext_pushed.send(self.app, _async_wrapper=self.app.ensure_sync)"
+        ],
+        "question": "What is the purpose of calling `appcontext_pushed.send` in this method?\n\n",
+        "answer": "The purpose of calling `appcontext_pushed.send` is to send a signal that the application context has been pushed, allowing any registered event handlers to execute.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/ctx.py"
+        ]
+    },
+    {
+        "context": [
+            "def open_session(self, app: Flask, request: Request) -> SessionMixin | None:\n        \"\"\"This is called at the beginning of each request, after\n        pushing the request context, before matching the URL.\n\n        This must return an object which implements a dictionary-like\n        interface as well as the :class:`SessionMixin` interface.\n\n        This will return ``None`` to indicate that loading failed in\n        some way that is not immediately an error. The request\n        context will fall back to using :meth:`make_null_session`\n        in this case.\n        \"\"\"\n        raise NotImplementedError()"
+        ],
+        "question": "What does the `open_session` method return when loading a session fails?\n",
+        "answer": "None, indicating that loading failed and the request context will fall back to using `make_null_session`.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/sessions.py"
+        ]
+    },
+    {
+        "context": [
+            "def request_context(self, environ: WSGIEnvironment) -> RequestContext:\n        \"\"\"Create a :class:`~flask.ctx.RequestContext` representing a\n        WSGI environment. Use a ``with`` block to push the context,\n        which will make :data:`request` point at this request.\n\n        See :doc:`/reqcontext`.\n\n        Typically you should not call this from your own code. A request\n        context is automatically pushed by the :meth:`wsgi_app` when\n        handling a request. Use :meth:`test_request_context` to create\n        an environment and context instead of this method.\n\n        :param environ: a WSGI environment\n        \"\"\"\n        return RequestContext(self, environ)"
+        ],
+        "question": "What is the purpose of calling `request_context` from within your own code?\n",
+        "answer": "The `request_context` should not be called directly from your own code. A request context is automatically pushed by the `wsgi_app` when handling a request, and you should use `test_request_context` to create an environment and context instead.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/app.py"
+        ]
+    },
+    {
+        "context": [
+            "class PassList(JSONTag):\n    __slots__ = ()\n\n    # Code for function: PassList.check(self, value: t.Any)\n# Code for function: PassList.to_json(self, value: t.Any)\n"
+        ],
+        "question": "What type of data does the PassList class represent?\n",
+        "answer": "The PassList class represents JSON data.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/json/tag.py"
+        ]
+    },
+    {
+        "context": [
+            "def __exit__(\n        self,\n        exc_type: type | None,\n        exc_value: BaseException | None,\n        tb: TracebackType | None,\n    ) -> None:\n        self.pop(exc_value)"
+        ],
+        "question": "What happens to the exception value when the `__exit__` method is called?\n\n",
+        "answer": "The exception value is popped from a stack using the `pop` method.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/ctx.py"
+        ]
+    },
+    {
+        "context": [
+            "def _get_source_fast(\n        self, environment: BaseEnvironment, template: str\n    ) -> tuple[str, str | None, t.Callable[[], bool] | None]:\n        for _srcobj, loader in self._iter_loaders(template):\n            try:\n                return loader.get_source(environment, template)\n            except TemplateNotFound:\n                continue\n        raise TemplateNotFound(template)"
+        ],
+        "question": "What happens when the `TemplateNotFound` exception is raised in the `_get_source_fast` method?\n",
+        "answer": "The `_get_source_fast` method raises a `TemplateNotFound` exception with the template name as an argument.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/templating.py"
+        ]
+    },
+    {
+        "context": [
+            "def __getattr__(self, name: str) -> t.Any:\n        try:\n            return self.__dict__[name]\n        except KeyError:\n            raise AttributeError(name) from None"
+        ],
+        "question": "What happens when a non-existent attribute is accessed on an object that uses this method?\n\n",
+        "answer": "A `KeyError` exception will be raised, which is then caught and re-raised as an `AttributeError` with the original name.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/ctx.py"
+        ]
+    },
+    {
+        "context": [
+            "class CertParamType(click.ParamType):\n    \"\"\"Click option type for the ``--cert`` option. Allows either an\n    existing file, the string ``'adhoc'``, or an import for a\n    :class:`~ssl.SSLContext` object.\n    \"\"\"\n\n    name = \"path\"\n\n    # Code for function: CertParamType.__init__(self)\n# Code for function: CertParamType.convert(self, value: t.Any, param: click.Parameter | None, ctx: click.Context | None)\n"
+        ],
+        "question": "What is the allowed input type for the `--cert` option in this Click parameter type?\n\n",
+        "answer": "The allowed input type is either a path to an existing file, the string `'adhoc'`, or an import for a :class:`~ssl.SSLContext` object.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/cli.py"
+        ]
+    },
+    {
+        "context": [
+            "// Code for Global Scope\nfrom __future__ import annotations\nimport typing as t\nfrom jinja2.loaders import BaseLoader\nfrom werkzeug.routing import RequestRedirect\nfrom .blueprints import Blueprint\nfrom .globals import request_ctx\nfrom .sansio.app import App\nif t.TYPE_CHECKING:\n    from .sansio.scaffold import Scaffold\n    from .wrappers import Request\n# Code for class: UnexpectedUnicodeError()\n# Code for class: DebugFilesKeyError(self, request: Request, key: str)\n# Code for function: DebugFilesKeyError.__init__(self, request: Request, key: str)\n# Code for function: DebugFilesKeyError.__str__(self)\n# Code for class: FormDataRoutingRedirect(self, request: Request)\n# Code for function: FormDataRoutingRedirect.__init__(self, request: Request)\n# Code for function: attach_enctype_error_multidict(request: Request, self, key: str)\n# Code for function: _dump_loader_info(loader: BaseLoader)\n# Code for function: explain_template_loading_attempts(app: App, template: str, attempts: list[\n        tuple[\n            BaseLoader, Scaffold, tuple[str, str | None, t.Callable[[], bool] | None] | None, ]\n    ], )\n"
+        ],
+        "question": "What is the purpose of the `explain_template_loading_attempts` function?\n",
+        "answer": "The `explain_template_loading_attempts` function appears to be used for debugging template loading issues in a Flask application. It takes an app instance and a list of template loading attempts as input, and returns some information about these attempts.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/debughelpers.py"
+        ]
+    },
+    {
+        "context": [
+            "def __enter__(self) -> RequestContext:\n        self.push()\n        return self"
+        ],
+        "question": "What happens when a developer enters the `RequestContext` object using the `with` statement?\n\n",
+        "answer": "When entering the `RequestContext` object, it calls its `push()` method to push the context onto the stack.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/ctx.py"
+        ]
+    },
+    {
+        "context": [
+            "def on_json_loading_failed(self, e: ValueError | None) -> t.Any:\n        try:\n            return super().on_json_loading_failed(e)\n        except BadRequest as ebr:\n            if current_app and current_app.debug:\n                raise\n\n            raise BadRequest() from ebr"
+        ],
+        "question": "What exception is raised when the `current_app` is not available or in non-debug mode?\n",
+        "answer": "A `BadRequest` exception is raised.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/wrappers.py"
+        ]
+    },
+    {
+        "context": [
+            "def __init_subclass__(cls, **kwargs: t.Any) -> None:\n        super().__init_subclass__(**kwargs)\n\n        if \"methods\" not in cls.__dict__:\n            methods = set()\n\n            for base in cls.__bases__:\n                if getattr(base, \"methods\", None):\n                    methods.update(base.methods)  # type: ignore[attr-defined]\n\n            for key in http_method_funcs:\n                if hasattr(cls, key):\n                    methods.add(key.upper())\n\n            if methods:\n                cls.methods = methods"
+        ],
+        "question": "What is the purpose of the `methods` attribute in a subclass created with this code?\n",
+        "answer": "The `methods` attribute is used to store a set of HTTP method names (e.g., GET, POST, PUT, DELETE) that are supported by the subclass.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/views.py"
+        ]
+    },
+    {
+        "context": [
+            "// Code for Global Scope\nfrom flask import Flask\napplication = Flask(__name__)\n"
+        ],
+        "question": "What is the name of the Flask application instance created in this code?\n",
+        "answer": "The name of the Flask application instance created is \"application\".",
+        "source_doc": [
+            "/home/javier/Documents/flask/tests/test_apps/cliapp/inner1/__init__.py"
+        ]
+    },
+    {
+        "context": [
+            "def to_python(self, value: t.Any) -> t.Any:\n        return tuple(value)"
+        ],
+        "question": "What type of object does the `to_python` method return for a given input?\n",
+        "answer": "The `to_python` method returns a tuple.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/json/tag.py"
+        ]
+    },
+    {
+        "context": [
+            "// Code for Global Scope\nfrom flask import Flask\ntestapp = Flask(\"testapp\")\n"
+        ],
+        "question": "What is the name of the Flask application instance created in this code?\n",
+        "answer": "The name of the Flask application instance created is \"testapp\".",
+        "source_doc": [
+            "/home/javier/Documents/flask/tests/test_apps/cliapp/app.py"
+        ]
+    },
+    {
+        "context": [
+            "// Code for Global Scope\nimport pytest\nfrom flask import g\nfrom flask import session\nfrom flaskr.db import get_db\n# Code for function: test_register(client, app)\n@pytest.mark.parametrize(\n    (\"username\", \"password\", \"message\"),\n    (\n        (\"\", \"\", b\"Username is required.\"),\n        (\"a\", \"\", b\"Password is required.\"),\n        (\"test\", \"test\", b\"already registered\"),\n    ),\n)\ndef test_register_validate_input(client, username, password, message):\n    response = client.post(\n        \"/auth/register\", data={\"username\": username, \"password\": password}\n    )\n    assert message in response.data\n# Code for function: test_login(client, auth)\n@pytest.mark.parametrize(\n    (\"username\", \"password\", \"message\"),\n    ((\"a\", \"test\", b\"Incorrect username.\"), (\"test\", \"a\", b\"Incorrect password.\")),\n)\ndef test_login_validate_input(auth, username, password, message):\n    response = auth.login(username, password)\n    assert message in response.data\n# Code for function: test_logout(client, auth)\n"
+        ],
+        "question": "What are the possible error messages returned by the register and login functions when invalid input is provided?\n",
+        "answer": "The possible error messages returned by the register and login functions when invalid input is provided are \"Username is required.\", \"Password is required.\", \"already registered\", \"Incorrect username.\", and \"Incorrect password.\".",
+        "source_doc": [
+            "/home/javier/Documents/flask/examples/tutorial/tests/test_auth.py"
+        ]
+    },
+    {
+        "context": [
+            "def test_handle_generic(self, app, client):\n        \"\"\"Generic ``Exception`` will handle all exceptions directly,\n        including ``HTTPExceptions``.\n        \"\"\"\n\n        @app.errorhandler(Exception)\n        def handle_exception(e):\n            return self.report_error(e)\n\n        assert client.get(\"/custom\").data == b\"direct Custom\"\n        assert client.get(\"/error\").data == b\"direct KeyError\"\n        assert client.get(\"/abort\").data == b\"direct InternalServerError\"\n        assert client.get(\"/not-found\").data == b\"direct NotFound\""
+        ],
+        "question": "What types of exceptions are handled directly by the `handle_exception` function?\n",
+        "answer": "The `handle_exception` function handles all exceptions, including HTTPExceptions.",
+        "source_doc": [
+            "/home/javier/Documents/flask/tests/test_user_error_handler.py"
+        ]
+    },
+    {
+        "context": [
+            "def create_url_adapter(self, request: Request | None) -> MapAdapter | None:\n        \"\"\"Creates a URL adapter for the given request. The URL adapter\n        is created at a point where the request context is not yet set\n        up so the request is passed explicitly.\n\n        .. versionchanged:: 3.1\n            If :data:`SERVER_NAME` is set, it does not restrict requests to\n            only that domain, for both ``subdomain_matching`` and\n            ``host_matching``.\n\n        .. versionchanged:: 1.0\n            :data:`SERVER_NAME` no longer implicitly enables subdomain\n            matching. Use :attr:`subdomain_matching` instead.\n\n        .. versionchanged:: 0.9\n           This can be called outside a request when the URL adapter is created\n           for an application context.\n\n        .. versionadded:: 0.6\n        \"\"\"\n        if request is not None:\n            if (trusted_hosts := self.config[\"TRUSTED_HOSTS\"]) is not None:\n                request.trusted_hosts = trusted_hosts\n\n            # Check trusted_hosts here until bind_to_environ does.\n            request.host = get_host(request.environ, request.trusted_hosts)  # pyright: ignore\n            subdomain = None\n            server_name = self.config[\"SERVER_NAME\"]\n\n            if self.url_map.host_matching:\n                # Don't pass SERVER_NAME, otherwise it's used and the actual\n                # host is ignored, which breaks host matching.\n                server_name = None\n            elif not self.subdomain_matching:\n                # Werkzeug doesn't implement subdomain matching yet. Until then,\n                # disable it by forcing the current subdomain to the default, or\n                # the empty string.\n                subdomain = self.url_map.default_subdomain or \"\"\n\n            return self.url_map.bind_to_environ(\n                request.environ, server_name=server_name, subdomain=subdomain\n            )\n\n        # Need at least SERVER_NAME to match/build outside a request.\n        if self.config[\"SERVER_NAME\"] is not None:\n            return self.url_map.bind(\n                self.config[\"SERVER_NAME\"],\n                script_name=self.config[\"APPLICATION_ROOT\"],\n                url_scheme=self.config[\"PREFERRED_URL_SCHEME\"],\n            )\n\n        return None"
+        ],
+        "question": "What happens when the input request is None in the create_url_adapter function?\n",
+        "answer": "The function returns None.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/app.py"
+        ]
+    },
+    {
+        "context": [
+            "def __exit__(\n        self,\n        exc_type: type | None,\n        exc_value: BaseException | None,\n        tb: TracebackType | None,\n    ) -> None:\n        self.preserve_context = False\n        self._context_stack.close()"
+        ],
+        "question": "What happens to the context stack when an exception is raised in a with statement?\n\n",
+        "answer": "The context stack is closed.",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/testing.py"
+        ]
+    },
+    {
+        "context": [
+            "def __init__(\n        self,\n        add_default_commands: bool = True,\n        create_app: t.Callable[..., Flask] | None = None,\n        add_version_option: bool = True,\n        load_dotenv: bool = True,\n        set_debug_flag: bool = True,\n        **extra: t.Any,\n    ) -> None:\n        params: list[click.Parameter] = list(extra.pop(\"params\", None) or ())\n        # Processing is done with option callbacks instead of a group\n        # callback. This allows users to make a custom group callback\n        # without losing the behavior. --env-file must come first so\n        # that it is eagerly evaluated before --app.\n        params.extend((_env_file_option, _app_option, _debug_option))\n\n        if add_version_option:\n            params.append(version_option)\n\n        if \"context_settings\" not in extra:\n            extra[\"context_settings\"] = {}\n\n        extra[\"context_settings\"].setdefault(\"auto_envvar_prefix\", \"FLASK\")\n\n        super().__init__(params=params, **extra)\n\n        self.create_app = create_app\n        self.load_dotenv = load_dotenv\n        self.set_debug_flag = set_debug_flag\n\n        if add_default_commands:\n            self.add_command(run_command)\n            self.add_command(shell_command)\n            self.add_command(routes_command)\n\n        self._loaded_plugin_commands = False"
+        ],
+        "question": "What is the default prefix for auto-generated environment variables in Flask?\n\n",
+        "answer": "The default prefix for auto-generated environment variables in Flask is \"FLASK\".",
+        "source_doc": [
+            "/home/javier/Documents/flask/src/flask/cli.py"
+        ]
+    }
+]

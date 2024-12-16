@@ -1,7 +1,7 @@
 from langchain_community.document_loaders import DirectoryLoader
 from langchain_core.documents import Document
 from langchain_core.runnables.base import Runnable
-from langchain_ollama import OllamaLLM
+from langchain_ollama import ChatOllama
 from langchain_core.prompts import PromptTemplate
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from typing import List
@@ -72,7 +72,7 @@ def generate_question_answer_pair(llm_chain: Runnable, docs: List[Document], pai
             )
         except:
             continue
-    return json.dumps(outputs)
+    return json.dumps(outputs, indent=4)
 
 
 def parse_args():
@@ -100,8 +100,8 @@ def parse_args():
     parser.add_argument(
         "--ref-docs-count",
         type=int,
-        default=3,
-        help="Number of reference documents to use as a context to generate the question and answer pair (default is 3)"
+        default=1,
+        help="Number of random reference documents to use as a context to generate the question and answer pair (default is 1)"
     )
 
     parser.add_argument(
@@ -134,15 +134,30 @@ def main():
         docPreprocessing(documents)
 
     # load the language model
-    llm = OllamaLLM(model="llama3.1:8b",
+    llm = ChatOllama(model="llama3.1:8b",
                     num_predict=-1,
                     temperature=0.035)
 
     qa_generation_prompt = PromptTemplate(template=""" 
     Your task is to write a factoid question and an answer given a context.
+    The question should be something a developer might naturally ask when analyzing or working with this code. For example:
+      - What does this function do?
+      - What will this return for input `foobar`?
+      - How does this behave when the input is negative?
+      - How do I deserialize json data?
+      - How do I start up a flask app server?
+      - How do I configure routes? 
+      - How do I create a custom error handler? 
+      - Are there ways to implement test cases for this part of my application? 
+      - Does flask handle password hashing? 
+      - Does flask have ORM features?
+      - Can you render frontend with flask?
+  
+    The question should not refer to the code as "this code" or "context", but rather focus on the actual behavior of the code.
+    Keep the question natural, as if you were explaining the code to someone else in a casual setting, and it must be formulated in the same style as questions users could ask in a search engine or a forum.
+    Provide your answer in a clear, technical manner, focused on the code’s functionality or expected behavior.
+
     Your factoid question should be answerable with a specific, concise piece of factual information from the context.
-    Your factoid question should be formulated in the same style as questions users could ask in a search engine.
-    This means that your factoid question MUST NOT mention something like "according to the passage" or "context".
 
     Provide your answer as follows:
 
@@ -154,7 +169,6 @@ def main():
 
     Context: {context}\n
     Output:::""", input_variables=['context'])
-
 
     qa_chain = create_stuff_documents_chain(llm, qa_generation_prompt)
 
