@@ -68,6 +68,7 @@ retriever = EnsembleRetriever(retrievers=[bm25_retriever, faiss_retriever], weig
 
 # Load LLM - ChatOllama is newer than OllamaLLM and supports new features like function calling
 llm = ChatOllama(model="llama3.1:8b",
+                 verbose=True,
                 num_predict=-1,
                 temperature=0)
 
