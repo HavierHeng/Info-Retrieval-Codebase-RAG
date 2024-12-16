@@ -137,7 +137,6 @@ Answer:""", input_variables=['input', 'context'])
 # )
 
 
-# while True:
 questions = ["How do I deserialize json data?",
     "How do I start up a flask app server?",
     "How do I configure routes?",
@@ -150,15 +149,10 @@ questions = ["How do I deserialize json data?",
     "How do I implement middleware?"]
 
 for question in questions:
-
-    # inputP = input("What do you want to ask?\n").lower()
     bm25score = bm25.get_scores(customQuerySplitter(query=question))
     top_query_bm25_number = min(len(documents), 25)
     top_doc_indices = np.argsort(bm25score)[-top_query_bm25_number:]
-
     top_docs_list = [documents[i] for i in top_doc_indices]
-    query_embedings = embeddings.embed_query(question)
-
     tempFaiss = FAISS.from_documents(top_docs_list, embeddings)
 
     retriever = tempFaiss.as_retriever(search_kwargs={'k': 4})

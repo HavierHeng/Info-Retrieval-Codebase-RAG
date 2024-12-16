@@ -8,8 +8,6 @@ Bulk of the implementation of the RAG system using Langchain to build a custom r
 
 ### Base design
 
-TODO: Pick an embedding model - based on testing
-
 `FAISS` is used to store dense vector embeddings.
 
 TF-IDF index is built and stored using `rank_bm25`.

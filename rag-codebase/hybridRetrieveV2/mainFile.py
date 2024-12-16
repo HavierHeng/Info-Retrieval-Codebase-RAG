@@ -21,23 +21,11 @@ embeddings = HuggingFaceEmbeddings(
     model_name="sentence-transformers/multi-qa-mpnet-base-cos-v1",
     model_kwargs={'device': "cuda"})
 
-# if os.path.isdir(folderPath):
-#     db = FAISS.load_local(
-#         folderPath, embeddings, allow_dangerous_deserialization=True)
-# else:
-
 loader = DirectoryLoader("../../../flask",
                          glob="*.py", loader_cls=PythonASTDocumentLoader, recursive=True)
 # interpret information in the documents
+
 documents = loader.load()
-
-# interpreting the output from the docs
-# for doc in documents:
-#     print(doc.page_content)
-#     print(doc.metadata)
-#     print("\n")
-#     break
-
 # augment page data with some meta data
 for docs in documents:
     newContent = f"""Block Type: {docs.metadata['block_type']}
@@ -79,23 +67,6 @@ At the end of your commentary, if you gave a good answer:
 Question: {input} 
 
 Answer:""", input_variables=['input', 'context'])
-
-
-# qa_llm = RetrievalQA.from_chain_type(llm=llm,
-#                                      chain_type='stuff',
-#                                      retriever=retriever,
-#                                      return_source_documents=True,
-#                                      chain_type_kwargs={'prompt': prompt})
-
-# ask the AI chat about information in our local files
-
-
-# rag_chain = (
-#     {"context": retriever | format_docs, "question": RunnablePassthrough()}
-#     | prompt
-#     | llm
-#     | StrOutputParser()
-# )
 
 questions = ["How do I deserialize json data?",
     "How do I start up a flask app server?",
