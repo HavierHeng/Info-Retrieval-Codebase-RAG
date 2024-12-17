@@ -1,0 +1,41 @@
+Retriever Type,Reranker,Parameters,Hit Rate,Precision,Recall,F1 Score,MRR
+Chained Retriever,None (Baseline),"bm25_n: 25
+
+faiss_n: 10
+
+final_k: 5 ",0.783,0.36,0.85,0.48,0.592
+Ensemble Retriever,None (Baseline),"weight: [0.4, 0.6]
+
+top_k: 10
+
+final_k: 5",0.652,0.3,0.667,0.393,0.75
+Chained Retriever,FlashRank,"bm25_n: 25
+
+faiss_n: 10
+
+final_k: 5",0.435,0.2,0.533,0.279,0.533
+Ensemble Retriever,FlashRank,"weight: [0.4, 0.6]
+
+top_k: 10
+
+final_k: 5",0.304,0.14,0.425,0.203,0.365
+Chained Retriever,bge-reranker-base,"bm25_n: 25
+
+faiss_n: 10
+
+final_k: 5",0.696,0.32,0.783,0.432,0.808
+Ensemble Retriever,bge-reranker-base,"weight: [0.4, 0.6]
+
+top_k: 10
+
+final_k: 5",0.565,0.26,0.65,0.35,0.703
+Chained Retriever,colbert,"bm25_n: 25
+
+faiss_n: 10
+
+final_k: 5",0.696,0.32,0.783,0.432,0.7
+Ensemble Retriever,colbert,"weight: [0.4, 0.6]
+
+top_k: 10
+
+final_k: 5",0.565,0.26,0.6,0.345,0.65
