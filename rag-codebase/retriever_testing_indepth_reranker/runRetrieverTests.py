@@ -77,6 +77,9 @@ def evaluate_retrievers(retrievers, test_cases, ensemble: EnsembleSearch, hybrid
                     "reranker": retriever["reranker"]
                 }
 
+            print("Testing with", parameter)
+            print("Retrieved Docs Count:", len(retrieved_docs))
+
             # Calculate hits
             hits = 0
             for doc in retrieved_docs:
@@ -131,7 +134,7 @@ def evaluate_retrievers(retrievers, test_cases, ensemble: EnsembleSearch, hybrid
 loader = DirectoryLoader("/home/javier/Documents/flask",
                          glob="*.py", loader_cls=PythonASTDocumentLoader, recursive=True)
 documents = loader.load()
-
+print("Loaded", len(documents), "documents")
 
 # Load test variables
 with open('RetrieverTester.json', 'r') as file:

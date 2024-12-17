@@ -1,10 +1,10 @@
+from langchain_core.documents import BaseDocumentCompressor
 import numpy as np
 from rank_bm25 import BM25Okapi
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_community.retrievers import BM25Retriever
 from langchain.retrievers import EnsembleRetriever
-from langchain.retrievers.document_compressors.cross_encoder_rerank import CrossEncoderReranker
 from typing import Optional
 
 import re
@@ -32,7 +32,7 @@ class HybridSearch:
 
         # Sentence transformer for embeddings
 
-    def search(self, query, bm25_n=25, faiss_n=10, final_k=5, reranker:Optional[CrossEncoderReranker] = None):
+    def search(self, query, bm25_n=25, faiss_n=10, final_k=5, reranker:Optional[BaseDocumentCompressor] = None):
         # BM25 search
         bm25score = self.bm25.get_scores(self.customQuerySplitter(query))
         top_query_bm25_number = min(len(self.documents), bm25_n)
@@ -99,7 +99,7 @@ class EnsembleSearch:
 
         self.db = FAISS.from_documents(documents, self.embeddings)
 
-    def search(self, query, weight, top_n=10, final_k=5, reranker:Optional[CrossEncoderReranker] = None):
+    def search(self, query, weight, top_n=10, final_k=5, reranker:Optional[BaseDocumentCompressor] = None):
         # Hybrid extracts twice the final number of retrieved docs, reranks and takes the top few.
 
         self.bm25_retriever.k = 2*top_n

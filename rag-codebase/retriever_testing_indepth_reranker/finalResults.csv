@@ -1,9 +1,9 @@
 ,Retriever Type,Parameters,Hit Rate,Precision,Recall,F1 Score,MRR
-0,hybrid_retriever,"{'bm25_n': 25, 'faiss_n': 10, 'final_k': 5, 'reranker': 'None'}",0.0,0.0,0.0,0.0,0.0
-1,ensemble_retriever,"{'weight': [0.4, 0.6], 'top_k': 10, 'final_k': 5, 'reranker': 'None'}",0.0,0.0,0.0,0.0,0.0
-2,hybrid_retriever,"{'bm25_n': 25, 'faiss_n': 10, 'final_k': 5, 'reranker': 'flashrank'}",0.0,0.0,0.0,0.0,0.0
-3,ensemble_retriever,"{'weight': [0.4, 0.6], 'top_k': 10, 'final_k': 5, 'reranker': 'flashrank'}",0.0,0.0,0.0,0.0,0.0
-4,hybrid_retriever,"{'bm25_n': 25, 'faiss_n': 10, 'final_k': 5, 'reranker': 'bge-reranker-base'}",0.0,0.0,0.0,0.0,0.0
-5,ensemble_retriever,"{'weight': [0.4, 0.6], 'top_k': 10, 'final_k': 5, 'reranker': 'bge-reranker-base'}",0.0,0.0,0.0,0.0,0.0
-6,hybrid_retriever,"{'bm25_n': 25, 'faiss_n': 10, 'final_k': 5, 'reranker': 'colbert'}",0.0,0.0,0.0,0.0,0.0
-7,ensemble_retriever,"{'weight': [0.4, 0.6], 'top_k': 10, 'final_k': 5, 'reranker': 'colbert'}",0.0,0.0,0.0,0.0,0.0
+0,hybrid_retriever,"{'bm25_n': 25, 'faiss_n': 10, 'final_k': 5, 'reranker': 'None'}",0.782608695652174,0.36,0.85,0.4797619047619047,0.5916666666666667
+1,ensemble_retriever,"{'weight': [0.4, 0.6], 'top_k': 10, 'final_k': 5, 'reranker': 'None'}",0.6521739130434783,0.3,0.6666666666666667,0.39285714285714285,0.75
+2,hybrid_retriever,"{'bm25_n': 25, 'faiss_n': 10, 'final_k': 5, 'reranker': 'flashrank'}",0.43478260869565216,0.2,0.5333333333333333,0.278968253968254,0.5333333333333333
+3,ensemble_retriever,"{'weight': [0.4, 0.6], 'top_k': 10, 'final_k': 5, 'reranker': 'flashrank'}",0.30434782608695654,0.14,0.425,0.2031746031746032,0.365
+4,hybrid_retriever,"{'bm25_n': 25, 'faiss_n': 10, 'final_k': 5, 'reranker': 'bge-reranker-base'}",0.6956521739130435,0.32,0.7833333333333333,0.4317460317460318,0.8083333333333333
+5,ensemble_retriever,"{'weight': [0.4, 0.6], 'top_k': 10, 'final_k': 5, 'reranker': 'bge-reranker-base'}",0.5652173913043478,0.26,0.65,0.34960317460317464,0.7033333333333334
+6,hybrid_retriever,"{'bm25_n': 25, 'faiss_n': 10, 'final_k': 5, 'reranker': 'colbert'}",0.6956521739130435,0.32,0.7833333333333333,0.4317460317460317,0.7
+7,ensemble_retriever,"{'weight': [0.4, 0.6], 'top_k': 10, 'final_k': 5, 'reranker': 'colbert'}",0.5652173913043478,0.26,0.6,0.34484126984126984,0.65
